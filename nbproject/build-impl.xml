@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SCOSS-impl" default="default" basedir=".." xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3">
+    <target name="default" depends="compile,jar" description="Build the whole project."/>
+    
+    <target name="-do-init">
+        <property file="nbproject/project.properties"/>
+        <property name="build.classes.dir" value="build/classes"/>
+        <property name="dist.dir" value="dist"/>
+        <property name="dist.jar" value="${dist.dir}/SCOSS.jar"/>
+        <property name="src.dir" value="src"/>
+    </target>
+
+    <target name="init" depends="-do-init"/>
+
+    <target name="compile" depends="init">
+        <mkdir dir="${build.classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${build.classes.dir}" includeantruntime="false" source="1.8" target="1.8">
+            <classpath path="${javac.classpath}"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+        <jar destfile="${dist.jar}" basedir="${build.classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="SCOSS"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="clean" depends="init">
+        <delete dir="build"/>
+        <delete dir="dist"/>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="${dist.jar}" fork="true"/>
+    </target>
+</project>
