@@ -22,7 +22,7 @@ public class Database {
         users.add(new User(3, "Lerato Dlamini", "lerato@spu.ac.za", "pass123", "student"));
         users.add(new User(4, "James Sithole", "james@spu.ac.za", "staff123", "staff"));
         users.add(new User(5, "Nomsa Khumalo", "nomsa@spu.ac.za", "staff123", "staff"));
-        users.add(new User(6, "Prof. Mamabolo", "manager@uni.ac.za", "mgr123", "manager"));
+        users.add(new User(6, "Choza Mamabolo", "manager@uni.ac.za", "mgr123", "manager"));
 
         // Locations
         locations.add(new Location(1, "Lecture Hall A101", "Block A", "Lecture Hall", -25.7461, 28.1881, "QR-LHA101"));
@@ -33,12 +33,12 @@ public class Database {
         locations.add(new Location(6, "Student Centre", "Central", "Support", -25.7468, 28.1888, "QR-STCTR1"));
 
         // Services
-        services.add(new Service(1, "IT Support", "Hardware/software issues", "IT Dept", 2));
-        services.add(new Service(2, "Academic Advising", "Course & module guidance", "Academic Dept", 4));
-        services.add(new Service(3, "Registration Help", "Enrolment queries", "Registry", 4));
-        services.add(new Service(4, "Counselling", "Student wellness support", "Student Svcs", 6));
-        services.add(new Service(5, "Residence Maint.", "Maintenance requests", "Facilities", 5));
-        services.add(new Service(6, "Library Services", "Books, printing, research", "Library", 3));
+        services.add(new Service(1, "IT Support", "Hardware/software issues", "IT Dept", 2, "ext 101"));
+        services.add(new Service(2, "Academic Advising", "Course & module guidance", "Academic Dept", 4, "advise@spu.ac.za"));
+        services.add(new Service(3, "Registration Help", "Enrolment queries", "Registry", 4, "reg@spu.ac.za"));
+        services.add(new Service(4, "Counselling", "Student wellness support", "Student Svcs", 6, "wellness@spu.ac.za"));
+        services.add(new Service(5, "Residence Maint.", "Maintenance requests", "Facilities", 5, "maint@spu.ac.za"));
+        services.add(new Service(6, "Library Services", "Books, printing, research", "Library", 3, "library@spu.ac.za"));
 
         // Requests
         requests.add(new Request(1, 1, 1, 2, "Projector not working in lab", "In Progress", "2026-04-20"));

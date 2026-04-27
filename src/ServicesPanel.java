@@ -85,12 +85,14 @@ public class ServicesPanel {
         p.setBackground(UIUtils.CARD);
 
         JTextField nameF = UIUtils.styledField("Service name");
+        JTextField descF = UIUtils.styledField("Description");
         JTextField deptF = UIUtils.styledField("Department");
         JComboBox<String> locBox = new JComboBox<>(Database.locations.stream().map(l->l.locationName).toArray(String[]::new));
         JTextField contactF = UIUtils.styledField("Contact info");
 
         if (!isNew) {
             nameF.setText(svc.serviceName); nameF.setForeground(UIUtils.TEXT1);
+            descF.setText(svc.description); descF.setForeground(UIUtils.TEXT1);
             deptF.setText(svc.department); deptF.setForeground(UIUtils.TEXT1);
             Location l = Database.findLocation(svc.locationId);
             if (l!=null) locBox.setSelectedItem(l.locationName);
@@ -101,17 +103,25 @@ public class ServicesPanel {
         save.setAlignmentX(Component.LEFT_ALIGNMENT);
         save.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         save.addActionListener(e -> {
-            String name = nameF.getText(); String dept = deptF.getText();
+            String name = nameF.getText(); 
+            String desc = descF.getText();
+            String dept = deptF.getText();
             int locId = Database.locations.get(locBox.getSelectedIndex()).locationId;
             String cont = contactF.getText();
-            if (isNew) Database.services.add(new Service(Database.nextSvcId++, name, dept, locId, cont));
-            else { svc.serviceName = name; svc.department = dept; svc.locationId = locId; svc.contactInfo = cont; }
+            if (isNew) Database.services.add(new Service(Database.nextSvcId++, name, desc, dept, locId, cont));
+            else { 
+                svc.serviceName = name; 
+                svc.description = desc;
+                svc.department = dept; 
+                svc.locationId = locId; 
+                svc.contactInfo = cont; 
+            }
             refreshSvcTable(model);
             d.dispose();
         });
 
-        String[] lbs = {"Name","Department","Location","Contact"};
-        JComponent[] flds = {nameF, deptF, locBox, contactF};
+        String[] lbs = {"Name","Description","Department","Location","Contact"};
+        JComponent[] flds = {nameF, descF, deptF, locBox, contactF};
         for (int i = 0; i < lbs.length; i++) {
             p.add(new JLabel(lbs[i])); p.add(Box.createVerticalStrut(4));
             flds[i].setAlignmentX(Component.LEFT_ALIGNMENT);
