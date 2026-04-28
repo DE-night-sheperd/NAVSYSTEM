@@ -113,7 +113,7 @@ public class RequestsPanel {
                             BorderFactory.createLineBorder(UIUtils.BORDER),
                             BorderFactory.createEmptyBorder(8,10,8,10)
                         ));
-                        JLabel by = new JLabel("Staff: " + (staff!=null?staff.fullName:"Unknown") + " — " + u.updateDate);
+                        JLabel by = new JLabel("Staff: " + (staff!=null?staff.name:"Unknown") + " — " + u.updateDate);
                         by.setFont(UIUtils.fontSmall); by.setForeground(UIUtils.TEXT2);
                         JLabel comment = new JLabel("<html>" + u.comment + "</html>");
                         comment.setFont(UIUtils.fontNormal);

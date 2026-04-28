@@ -10,7 +10,7 @@ public class HomePanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(UIUtils.NAVY);
         header.setBorder(BorderFactory.createEmptyBorder(24,28,24,28));
-        JLabel hl = new JLabel("Welcome, " + Database.currentUser.fullName);
+        JLabel hl = new JLabel("Welcome, " + Database.currentUser.name);
         hl.setFont(UIUtils.fontTitle); hl.setForeground(Color.WHITE);
         JLabel hs = new JLabel("Role: " + Database.currentUser.role.toUpperCase() + "  |  " + UIUtils.today());
         hs.setFont(UIUtils.fontSmall); hs.setForeground(new Color(148,163,184));

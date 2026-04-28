@@ -106,7 +106,7 @@ public class StaffPanel {
                 Location l = Database.findLocation(r.locationId);
                 m.addRow(new Object[]{
                     "REQ-"+String.format("%04d",r.requestId),
-                    (u!=null?u.fullName:"ID:"+r.userId),
+                    (u!=null?u.name:"ID:"+r.userId),
                     (s!=null?s.serviceName:"N/A"),
                     (l!=null?l.locationName:"N/A"),
                     r.status, r.requestDate
