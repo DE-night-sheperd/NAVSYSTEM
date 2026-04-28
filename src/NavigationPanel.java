@@ -1,11 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NavigationPanel {
     public static JPanel build() {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIUtils.BG);
-        root.add(UIUtils.pageHeader("Campus Navigation", "View venue locations and get directions"), BorderLayout.NORTH);
+        root.add(UIUtils.pageHeader("Campus Navigation", "View Sol Plaatje University venues and get directions"), BorderLayout.NORTH);
 
         JPanel body = new JPanel(new BorderLayout(16, 16));
         body.setBackground(UIUtils.BG);
@@ -23,7 +25,9 @@ public class NavigationPanel {
         left.add(search); left.add(Box.createVerticalStrut(10));
 
         DefaultListModel<String> listModel = new DefaultListModel<>();
-        for (Location l : Database.locations) listModel.addElement(l.locationName + " — " + l.category);
+        List<Location> currentLocations = new ArrayList<>(Database.locations);
+        
+        for (Location l : currentLocations) listModel.addElement(l.locationName + " — " + l.category);
         JList<String> locList = new JList<>(listModel);
         locList.setFont(UIUtils.fontNormal);
         locList.setSelectionBackground(UIUtils.lighter(UIUtils.ACCENT));
@@ -48,7 +52,12 @@ public class NavigationPanel {
 
         // Details card
         JPanel details = UIUtils.card();
-        details.setLayout(new BoxLayout(details, BoxLayout.Y_AXIS));
+        details.setLayout(new BorderLayout());
+        
+        JPanel detailsText = new JPanel();
+        detailsText.setLayout(new BoxLayout(detailsText, BoxLayout.Y_AXIS));
+        detailsText.setBackground(UIUtils.CARD);
+        
         JLabel detTitle = new JLabel("Select a location to see details");
         detTitle.setFont(UIUtils.fontBold); detTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel detInfo  = new JLabel(" ");
@@ -56,15 +65,34 @@ public class NavigationPanel {
         JLabel detCoord = new JLabel(" ");
         detCoord.setFont(UIUtils.fontSmall); detCoord.setForeground(UIUtils.TEXT2);
         detCoord.setAlignmentX(Component.LEFT_ALIGNMENT);
-        details.add(detTitle); details.add(Box.createVerticalStrut(6));
-        details.add(detInfo);  details.add(Box.createVerticalStrut(4));
-        details.add(detCoord);
+        detailsText.add(detTitle); detailsText.add(Box.createVerticalStrut(6));
+        detailsText.add(detInfo);  detailsText.add(Box.createVerticalStrut(4));
+        detailsText.add(detCoord);
+        
+        details.add(detailsText, BorderLayout.CENTER);
+        
+        // View toggle button
+        JButton toggleView = UIUtils.secondaryBtn("Switch to Map View");
+        toggleView.addActionListener(e -> {
+            if (toggleView.getText().contains("Map")) {
+                mapCanvas.setSatelliteView(false);
+                toggleView.setText("Switch to Satellite View");
+            } else {
+                mapCanvas.setSatelliteView(true);
+                toggleView.setText("Switch to Map View");
+            }
+        });
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btnPanel.setBackground(UIUtils.CARD);
+        btnPanel.add(toggleView);
+        details.add(btnPanel, BorderLayout.EAST);
+
         right.add(details, BorderLayout.SOUTH);
         body.add(right, BorderLayout.CENTER);
 
         locList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && locList.getSelectedIndex() >= 0) {
-                Location loc = Database.locations.get(locList.getSelectedIndex());
+                Location loc = currentLocations.get(locList.getSelectedIndex());
                 mapCanvas.highlight(loc);
                 detTitle.setText(loc.locationName + " — " + loc.category);
                 detInfo.setText("Building: " + loc.building + "   QR: " + loc.qrCodeData);
@@ -75,9 +103,12 @@ public class NavigationPanel {
         search.addActionListener(e -> {
             String q = search.getText().toLowerCase();
             listModel.clear();
+            currentLocations.clear();
             for (Location l : Database.locations) {
-                if (l.locationName.toLowerCase().contains(q) || l.category.toLowerCase().contains(q))
+                if (l.locationName.toLowerCase().contains(q) || l.category.toLowerCase().contains(q)) {
                     listModel.addElement(l.locationName + " — " + l.category);
+                    currentLocations.add(l);
+                }
             }
         });
 

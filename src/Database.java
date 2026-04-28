@@ -24,13 +24,14 @@ public class Database {
         users.add(new User(5, "Nomsa Khumalo", "nomsa@spu.ac.za", "staff123", "staff"));
         users.add(new User(6, "Choza Mamabolo", "manager@uni.ac.za", "mgr123", "manager"));
 
-        // Locations
-        locations.add(new Location(1, "Lecture Hall A101", "Block A", "Lecture Hall", -25.7461, 28.1881, "QR-LHA101"));
-        locations.add(new Location(2, "Computer Lab B204", "Block B", "IT Lab", -25.7465, 28.1885, "QR-LAB204"));
-        locations.add(new Location(3, "Main Library", "Central", "Library", -25.7470, 28.1890, "QR-MLIB01"));
-        locations.add(new Location(4, "Admin Office", "Block C", "Admin Office", -25.7455, 28.1875, "QR-ADOFF1"));
-        locations.add(new Location(5, "Residence Block C", "Res Area", "Residence", -25.7480, 28.1870, "QR-RESC01"));
-        locations.add(new Location(6, "Student Centre", "Central", "Support", -25.7468, 28.1888, "QR-STCTR1"));
+        // SPU Locations
+        locations.add(new Location(1, "Moroka Hall of Residence (C001)", "Central Campus", "Residence", -28.7455, 24.7670, "QR-C001"));
+        locations.add(new Location(2, "Library & Student Resources (C004)", "Central Campus", "Library", -28.7462, 24.7680, "QR-C004"));
+        locations.add(new Location(3, "Academic Building (C003)", "Central Campus", "Lecture Hall", -28.7460, 24.7685, "QR-C003"));
+        locations.add(new Location(4, "Data Science & IT Labs (C006)", "Central Campus", "IT Lab", -28.7465, 24.7682, "QR-C006"));
+        locations.add(new Location(5, "Windhoek Draught Park", "South Campus", "Sports", -28.7515, 24.7685, "QR-WDP"));
+        locations.add(new Location(6, "Umnandi Hall of Residence (S005)", "South Campus", "Residence", -28.7500, 24.7690, "QR-S005"));
+        locations.add(new Location(7, "North Campus Administration", "North Campus", "Admin Office", -28.7405, 24.7655, "QR-NCADMIN"));
 
         // Services
         services.add(new Service(1, "IT Support", "Hardware/software issues", "IT Dept", 2, "ext 101"));

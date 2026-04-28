@@ -1,5 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MapCanvas extends JPanel {
     public Location highlighted;
@@ -8,13 +18,117 @@ public class MapCanvas extends JPanel {
         new Color(139,92,246), new Color(236,72,153)
     };
 
+    // Map state
+    private double centerLat = -28.7460;
+    private double centerLon = 24.7675;
+    private int zoom = 16;
+    private final int TILE_SIZE = 256;
+    private boolean satelliteView = true;
+
+    // Interaction state
+    private Point lastMousePos;
+
+    // Tile cache and fetching
+    private final Map<String, Image> tileCache = new LinkedHashMap<String, Image>(100, 0.75f, true) {
+        protected boolean removeEldestEntry(Map.Entry<String, Image> eldest) {
+            return size() > 150;
+        }
+    };
+    private final ExecutorService tileFetcher = Executors.newFixedThreadPool(4);
+
     public MapCanvas() { 
-        setBackground(new Color(230,240,255)); 
+        setBackground(new Color(230,240,255));
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        MouseAdapter ma = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                lastMousePos = e.getPoint();
+            }
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (lastMousePos != null) {
+                    int dx = lastMousePos.x - e.getX();
+                    int dy = lastMousePos.y - e.getY();
+                    
+                    // Calculate pixels to lat/lon
+                    double n = Math.pow(2.0, zoom);
+                    double lonDiff = (dx / (double)TILE_SIZE) * 360.0 / n;
+                    
+                    // Y diff is more complex due to Mercator projection
+                    double latRad = Math.toRadians(centerLat);
+                    double y = (1.0 - Math.log(Math.tan(latRad) + 1.0 / Math.cos(latRad)) / Math.PI) / 2.0 * n;
+                    y += (dy / (double)TILE_SIZE);
+                    double newLatRad = Math.atan(Math.sinh(Math.PI * (1.0 - 2.0 * y / n)));
+                    
+                    centerLon += lonDiff;
+                    centerLat = Math.toDegrees(newLatRad);
+                    
+                    lastMousePos = e.getPoint();
+                    repaint();
+                }
+            }
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getWheelRotation() < 0) {
+                    if (zoom < 19) zoom++;
+                } else {
+                    if (zoom > 2) zoom--;
+                }
+                repaint();
+            }
+        };
+
+        addMouseListener(ma);
+        addMouseMotionListener(ma);
+        addMouseWheelListener(ma);
+    }
+
+    public void setSatelliteView(boolean sat) {
+        this.satelliteView = sat;
+        repaint();
     }
 
     public void highlight(Location l) { 
-        highlighted = l; 
+        highlighted = l;
+        if (l != null) {
+            centerLat = l.latitude;
+            centerLon = l.longitude;
+            if (zoom < 17) zoom = 17;
+        }
         repaint(); 
+    }
+
+    private Point2D.Double latLonToTileXY(double lat, double lon, int z) {
+        double n = Math.pow(2.0, z);
+        double x = ((lon + 180.0) / 360.0) * n;
+        double latRad = Math.toRadians(lat);
+        double y = (1.0 - Math.log(Math.tan(latRad) + 1.0 / Math.cos(latRad)) / Math.PI) / 2.0 * n;
+        return new Point2D.Double(x, y);
+    }
+
+    private void requestTile(String key, String urlString) {
+        if (tileCache.containsKey(key)) return;
+        
+        // Put a placeholder so we don't request again
+        tileCache.put(key, new BufferedImage(TILE_SIZE, TILE_SIZE, BufferedImage.TYPE_INT_ARGB));
+        
+        tileFetcher.submit(() -> {
+            try {
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("User-Agent", "SCOSS-App/1.0");
+                Image img = ImageIO.read(conn.getInputStream());
+                if (img != null) {
+                    SwingUtilities.invokeLater(() -> {
+                        tileCache.put(key, img);
+                        repaint();
+                    });
+                }
+            } catch (Exception ex) {
+                // Ignore download errors
+            }
+        });
     }
 
     @Override
@@ -23,77 +137,117 @@ public class MapCanvas extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Grid
-        g2.setColor(new Color(200,215,240));
-        g2.setStroke(new BasicStroke(0.5f));
-        for (int x = 0; x < getWidth(); x += 40) g2.drawLine(x, 0, x, getHeight());
-        for (int y = 0; y < getHeight(); y += 40) g2.drawLine(0, y, getWidth(), y);
+        int w = getWidth();
+        int h = getHeight();
 
-        // Campus outline
-        g2.setColor(new Color(180,210,240)); 
-        g2.setStroke(new BasicStroke(2f));
-        g2.drawRoundRect(40, 30, getWidth()-80, getHeight()-60, 20, 20);
+        // Calculate center tile coordinates
+        Point2D.Double centerTile = latLonToTileXY(centerLat, centerLon, zoom);
+        
+        int centerX = (int)Math.floor(centerTile.x);
+        int centerY = (int)Math.floor(centerTile.y);
+        
+        double offsetX = centerTile.x - centerX;
+        double offsetY = centerTile.y - centerY;
 
-        // Road
-        g2.setColor(new Color(220,225,235)); 
-        g2.fillRect(0, getHeight()/2-12, getWidth(), 24);
-        g2.setColor(new Color(200,210,225)); 
-        g2.setStroke(new BasicStroke(1f));
-        g2.drawLine(0, getHeight()/2, getWidth(), getHeight()/2);
+        int startX = centerX - (w / TILE_SIZE) / 2 - 1;
+        int endX   = centerX + (w / TILE_SIZE) / 2 + 1;
+        int startY = centerY - (h / TILE_SIZE) / 2 - 1;
+        int endY   = centerY + (h / TILE_SIZE) / 2 + 1;
 
-        // Find bounds
-        double minLat=-25.7485, maxLat=-25.7450, minLon=28.1865, maxLon=28.1900;
-        int margin = 60;
+        // Draw Tiles
+        for (int tx = startX; tx <= endX; tx++) {
+            for (int ty = startY; ty <= endY; ty++) {
+                int screenX = (int)((tx - centerTile.x) * TILE_SIZE) + w/2;
+                int screenY = (int)((ty - centerTile.y) * TILE_SIZE) + h/2;
 
-        for (int i = 0; i < Database.locations.size(); i++) {
-            Location l = Database.locations.get(i);
-            double nx = (l.longitude - minLon)/(maxLon - minLon);
-            double ny = (l.latitude  - maxLat)/(minLat - maxLat);
-            int px = margin + (int)(nx * (getWidth()  - 2*margin));
-            int py = margin + (int)(ny * (getHeight() - 2*margin));
+                String key = satelliteView ? "sat_" + zoom + "_" + tx + "_" + ty : "osm_" + zoom + "_" + tx + "_" + ty;
+                Image img = tileCache.get(key);
 
-            boolean isHighlighted = highlighted != null && highlighted.locationId == l.locationId;
-            Color col = pinColors[i % pinColors.length];
-
-            // Building block
-            g2.setColor(UIUtils.lighter(col));
-            g2.fillRoundRect(px-14, py-14, 28, 28, 6, 6);
-            g2.setColor(col); 
-            g2.setStroke(new BasicStroke(isHighlighted ? 2.5f : 1.5f));
-            g2.drawRoundRect(px-14, py-14, 28, 28, 6, 6);
-
-            // Initial letter
-            g2.setColor(col.darker());
-            g2.setFont(new Font("SansSerif", Font.BOLD, 11));
-            String init = l.locationName.substring(0,1).toUpperCase();
-            FontMetrics fm = g2.getFontMetrics();
-            g2.drawString(init, px - fm.stringWidth(init)/2, py + fm.getAscent()/2 - 2);
-
-            // Label
-            if (isHighlighted) {
-                g2.setColor(UIUtils.CARD);
-                String name = l.locationName.length()>18 ? l.locationName.substring(0,15)+"..." : l.locationName;
-                FontMetrics fm2 = g2.getFontMetrics(new Font("SansSerif",Font.PLAIN,10));
-                int lw = fm2.stringWidth(name) + 8;
-                g2.fillRoundRect(px - lw/2, py - 38, lw, 18, 4, 4);
-                g2.setColor(UIUtils.TEXT2); 
-                g2.setStroke(new BasicStroke(0.5f));
-                g2.drawRoundRect(px - lw/2, py - 38, lw, 18, 4, 4);
-                g2.setFont(new Font("SansSerif",Font.PLAIN,10));
-                g2.setColor(UIUtils.TEXT1);
-                g2.drawString(name, px - fm2.stringWidth(name)/2, py - 24);
-            } else {
-                g2.setFont(new Font("SansSerif",Font.PLAIN,9));
-                g2.setColor(UIUtils.TEXT2);
-                FontMetrics fm2 = g2.getFontMetrics();
-                String short_ = l.locationName.length()>12 ? l.locationName.substring(0,10)+".." : l.locationName;
-                g2.drawString(short_, px - fm2.stringWidth(short_)/2, py + 26);
+                if (img != null && img instanceof BufferedImage && ((BufferedImage)img).getType() != BufferedImage.TYPE_INT_ARGB) {
+                    g2.drawImage(img, screenX, screenY, TILE_SIZE, TILE_SIZE, null);
+                } else if (img == null) {
+                    String url = satelliteView ?
+                        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/" + zoom + "/" + ty + "/" + tx :
+                        "https://tile.openstreetmap.org/" + zoom + "/" + tx + "/" + ty + ".png";
+                    requestTile(key, url);
+                    
+                    // Draw loading rect
+                    g2.setColor(new Color(240, 240, 240));
+                    g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                    g2.setColor(new Color(200, 200, 200));
+                    g2.drawRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                } else {
+                    // It's the placeholder, draw loading rect
+                    g2.setColor(new Color(240, 240, 240));
+                    g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                }
             }
         }
 
-        // Legend
-        g2.setFont(new Font("SansSerif",Font.BOLD,10));
-        g2.setColor(UIUtils.TEXT2);
-        g2.drawString("Campus Map — Location Overview", 8, 16);
+        // Draw Locations
+        for (int i = 0; i < Database.locations.size(); i++) {
+            Location l = Database.locations.get(i);
+            Point2D.Double p = latLonToTileXY(l.latitude, l.longitude, zoom);
+            int px = (int)((p.x - centerTile.x) * TILE_SIZE) + w/2;
+            int py = (int)((p.y - centerTile.y) * TILE_SIZE) + h/2;
+
+            // Only draw if on screen
+            if (px > -50 && px < w + 50 && py > -50 && py < h + 50) {
+                boolean isHighlighted = highlighted != null && highlighted.locationId == l.locationId;
+                Color col = pinColors[i % pinColors.length];
+
+                // Draw Pin background
+                g2.setColor(UIUtils.lighter(col));
+                g2.fillRoundRect(px-14, py-14, 28, 28, 6, 6);
+                g2.setColor(col); 
+                g2.setStroke(new BasicStroke(isHighlighted ? 2.5f : 1.5f));
+                g2.drawRoundRect(px-14, py-14, 28, 28, 6, 6);
+
+                // Initial letter
+                g2.setColor(col.darker());
+                g2.setFont(new Font("SansSerif", Font.BOLD, 11));
+                String init = l.locationName.substring(0,1).toUpperCase();
+                FontMetrics fm = g2.getFontMetrics();
+                g2.drawString(init, px - fm.stringWidth(init)/2, py + fm.getAscent()/2 - 2);
+
+                // Label
+                if (isHighlighted) {
+                    g2.setColor(UIUtils.CARD);
+                    String name = l.locationName.length()>18 ? l.locationName.substring(0,15)+"..." : l.locationName;
+                    FontMetrics fm2 = g2.getFontMetrics(new Font("SansSerif",Font.PLAIN,10));
+                    int lw = fm2.stringWidth(name) + 8;
+                    g2.fillRoundRect(px - lw/2, py - 38, lw, 18, 4, 4);
+                    g2.setColor(UIUtils.TEXT2); 
+                    g2.setStroke(new BasicStroke(0.5f));
+                    g2.drawRoundRect(px - lw/2, py - 38, lw, 18, 4, 4);
+                    g2.setFont(new Font("SansSerif",Font.PLAIN,10));
+                    g2.setColor(UIUtils.TEXT1);
+                    g2.drawString(name, px - fm2.stringWidth(name)/2, py - 24);
+                } else {
+                    g2.setFont(new Font("SansSerif",Font.PLAIN,11));
+                    g2.setColor(Color.WHITE);
+                    FontMetrics fm2 = g2.getFontMetrics();
+                    String short_ = l.locationName.length()>12 ? l.locationName.substring(0,10)+".." : l.locationName;
+                    
+                    // Add text shadow for visibility on satellite map
+                    g2.drawString(short_, px - fm2.stringWidth(short_)/2 + 1, py + 26 + 1);
+                    g2.setColor(Color.BLACK);
+                    g2.drawString(short_, px - fm2.stringWidth(short_)/2, py + 26);
+                }
+            }
+        }
+
+        // Legend / UI
+        g2.setFont(new Font("SansSerif",Font.BOLD,12));
+        g2.setColor(Color.BLACK);
+        g2.drawString("Sol Plaatje University Campus Map", 11, 21);
+        g2.setColor(Color.WHITE);
+        g2.drawString("Sol Plaatje University Campus Map", 10, 20);
+
+        g2.setFont(new Font("SansSerif",Font.PLAIN,10));
+        g2.setColor(Color.BLACK);
+        g2.drawString("Drag to pan, scroll to zoom", 11, 36);
+        g2.setColor(Color.WHITE);
+        g2.drawString("Drag to pan, scroll to zoom", 10, 35);
     }
 }
