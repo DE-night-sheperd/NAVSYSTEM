@@ -31,7 +31,6 @@ public class MapCanvas extends JPanel {
     private double navCurrentLon;
     private double navDestLat;
     private double navDestLon;
-    private Timer navTimer;
     private Location navDestLocation;
 
     // Interaction state
@@ -114,58 +113,60 @@ public class MapCanvas extends JPanel {
         this.navDestLat = dest.latitude;
         this.navDestLon = dest.longitude;
 
-        // Set a simulated start location (e.g., SPU Main Entrance)
-        this.navCurrentLat = -28.7430;
-        this.navCurrentLon = 24.7660;
+        LiveLocationService.setTarget(navDestLat, navDestLon);
+        
+        LiveLocationService.requestLocation(this, new LiveLocationService.LocationListener() {
+            @Override
+            public void onLocationUpdated(double lat, double lon) {
+                boolean firstUpdate = !isNavigating;
+                navCurrentLat = lat;
+                navCurrentLon = lon;
+                isNavigating = true;
 
-        // Center map to see both points
-        this.centerLat = (navCurrentLat + navDestLat) / 2.0;
-        this.centerLon = (navCurrentLon + navDestLon) / 2.0;
-        this.zoom = 16;
+                if (firstUpdate) {
+                    // Center map to see both points
+                    centerLat = (navCurrentLat + navDestLat) / 2.0;
+                    centerLon = (navCurrentLon + navDestLon) / 2.0;
+                    
+                    // Adjust zoom based on distance
+                    double dLat = navDestLat - navCurrentLat;
+                    double dLon = navDestLon - navCurrentLon;
+                    double dist = Math.sqrt(dLat*dLat + dLon*dLon);
+                    if (dist > 1.0) zoom = 6;
+                    else if (dist > 0.1) zoom = 10;
+                    else zoom = 16;
+                    
+                    VoiceGuide.speak("Location permission granted. Navigating to " + dest.locationName + ".");
+                }
 
-        this.isNavigating = true;
+                // Keep map centered on user
+                centerLat = navCurrentLat;
+                centerLon = navCurrentLon;
 
-        if (navTimer != null) navTimer.stop();
-
-        VoiceGuide.speak("Navigating to " + dest.locationName + ". Proceed along the highlighted path.");
-
-        navTimer = new Timer(150, e -> {
-            // Move current location 1% closer to destination per tick
-            double dLat = navDestLat - navCurrentLat;
-            double dLon = navDestLon - navCurrentLon;
-            
-            // Distance formula
-            double dist = Math.sqrt(dLat*dLat + dLon*dLon);
-            
-            if (dist < 0.0001) {
-                navTimer.stop();
-                isNavigating = false;
-                VoiceGuide.speak("You have arrived at " + dest.locationName);
+                // Check distance
+                double dLat = navDestLat - navCurrentLat;
+                double dLon = navDestLon - navCurrentLon;
+                double dist = Math.sqrt(dLat*dLat + dLon*dLon);
+                
+                if (dist < 0.0001) {
+                    LiveLocationService.stop();
+                    isNavigating = false;
+                    VoiceGuide.speak("You have arrived at " + dest.locationName);
+                }
+                
                 repaint();
-                return;
             }
 
-            // Move a fixed step size (simulating walking speed)
-            double step = 0.00005;
-            if (dist < step) {
-                navCurrentLat = navDestLat;
-                navCurrentLon = navDestLon;
-            } else {
-                navCurrentLat += (dLat / dist) * step;
-                navCurrentLon += (dLon / dist) * step;
+            @Override
+            public void onError(String message) {
+                JOptionPane.showMessageDialog(MapCanvas.this, "Location Error: " + message);
+                stopNavigation();
             }
-            
-            // Keep map centered on user
-            this.centerLat = navCurrentLat;
-            this.centerLon = navCurrentLon;
-
-            repaint();
         });
-        navTimer.start();
     }
 
     public void stopNavigation() {
-        if (navTimer != null) navTimer.stop();
+        LiveLocationService.stop();
         isNavigating = false;
         repaint();
     }
