@@ -9,8 +9,20 @@ public class ChatPanel {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIUtils.BG);
 
-        // Header
-        root.add(UIUtils.pageHeader("Nearby Chat", "Connect with other students and staff around campus"), BorderLayout.NORTH);
+        // Header with Call Buttons
+        JPanel headerPanel = UIUtils.pageHeader("Nearby Chat", "Connect with other students and staff around campus");
+        JPanel callActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        callActions.setOpaque(false);
+        callActions.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 20));
+        
+        JButton voiceCallBtn = UIUtils.secondaryBtn("📞 Voice Call");
+        JButton videoCallBtn = UIUtils.primaryBtn("📹 Video Call");
+        
+        callActions.add(voiceCallBtn);
+        callActions.add(videoCallBtn);
+        headerPanel.add(callActions, BorderLayout.SOUTH);
+
+        root.add(headerPanel, BorderLayout.NORTH);
 
         // Chat History Area
         JPanel chatBox = new JPanel();
@@ -35,8 +47,16 @@ public class ChatPanel {
         messageField.setPreferredSize(new Dimension(0, 45));
 
         JButton sendBtn = UIUtils.primaryBtn("Send");
+        JButton micBtn = UIUtils.secondaryBtn("🎤");
+        micBtn.setToolTipText("Hold to Record Voice Note");
+
+        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        actionsPanel.setOpaque(false);
+        actionsPanel.add(micBtn);
+        actionsPanel.add(sendBtn);
+
         inputPanel.add(messageField, BorderLayout.CENTER);
-        inputPanel.add(sendBtn, BorderLayout.EAST);
+        inputPanel.add(actionsPanel, BorderLayout.EAST);
         root.add(inputPanel, BorderLayout.SOUTH);
 
         Runnable loadMessages = () -> {
@@ -71,18 +91,50 @@ public class ChatPanel {
                 senderLabel.setFont(new Font("SansSerif", Font.BOLD, 10));
                 senderLabel.setForeground(isMe ? new Color(255, 255, 255, 200) : UIUtils.TEXT2);
 
-                JTextArea textLabel = new JTextArea(msg.text);
-                textLabel.setWrapStyleWord(true);
-                textLabel.setLineWrap(true);
-                textLabel.setEditable(false);
-                textLabel.setFocusable(false);
-                textLabel.setOpaque(false);
-                textLabel.setFont(UIUtils.fontNormal);
-                textLabel.setForeground(isMe ? Color.WHITE : UIUtils.TEXT1);
-                textLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+                JComponent contentComponent;
+
+                if (msg.text.startsWith("[CALL]")) {
+                    String[] parts = msg.text.split(":", 2);
+                    String callType = parts[1];
+                    JButton joinBtn = UIUtils.primaryBtn("Join " + callType);
+                    joinBtn.setBackground(new Color(34, 197, 94)); // Green for join
+                    joinBtn.addActionListener(e -> {
+                        JOptionPane.showMessageLabel(null, "Connecting to " + callType + "...", "Call", JOptionPane.INFORMATION_MESSAGE);
+                    });
+                    
+                    JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+                    p.setOpaque(false);
+                    JLabel l = new JLabel("Started a " + callType);
+                    l.setForeground(isMe ? Color.WHITE : UIUtils.TEXT1);
+                    p.add(l);
+                    p.add(joinBtn);
+                    contentComponent = p;
+                } else if (msg.text.startsWith("[VOICENOTE]")) {
+                    String duration = msg.text.substring(11);
+                    JButton playBtn = UIUtils.secondaryBtn("▶ Play " + duration);
+                    playBtn.addActionListener(e -> {
+                        playBtn.setText("⏸ Playing...");
+                        Timer t = new Timer(2000, evt -> playBtn.setText("▶ Play " + duration));
+                        t.setRepeats(false);
+                        t.start();
+                        VoiceGuide.speak("Voice note playback simulated");
+                    });
+                    contentComponent = playBtn;
+                } else {
+                    JTextArea textLabel = new JTextArea(msg.text);
+                    textLabel.setWrapStyleWord(true);
+                    textLabel.setLineWrap(true);
+                    textLabel.setEditable(false);
+                    textLabel.setFocusable(false);
+                    textLabel.setOpaque(false);
+                    textLabel.setFont(UIUtils.fontNormal);
+                    textLabel.setForeground(isMe ? Color.WHITE : UIUtils.TEXT1);
+                    textLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+                    contentComponent = textLabel;
+                }
 
                 bubbleWrapper.add(senderLabel, BorderLayout.NORTH);
-                bubbleWrapper.add(textLabel, BorderLayout.CENTER);
+                bubbleWrapper.add(contentComponent, BorderLayout.CENTER);
 
                 // Align left or right
                 JPanel alignPanel = new JPanel(new FlowLayout(isMe ? FlowLayout.RIGHT : FlowLayout.LEFT));
@@ -90,8 +142,8 @@ public class ChatPanel {
                 
                 // Set max width to make text wrap properly
                 bubbleWrapper.setPreferredSize(new Dimension(
-                    Math.min(400, textLabel.getPreferredSize().width + 40),
-                    textLabel.getPreferredSize().height + 40
+                    Math.min(400, contentComponent.getPreferredSize().width + 40),
+                    contentComponent.getPreferredSize().height + 40
                 ));
                 
                 alignPanel.add(bubbleWrapper);
@@ -124,6 +176,50 @@ public class ChatPanel {
 
         sendBtn.addActionListener(e -> sendMessage.run());
         messageField.addActionListener(e -> sendMessage.run());
+
+        voiceCallBtn.addActionListener(e -> {
+            String sender = Database.currentUser != null ? Database.currentUser.name : "Guest";
+            String time = new SimpleDateFormat("HH:mm").format(new Date());
+            Database.addChatMessage(new ChatMessage(sender, "[CALL]:Voice Call", time));
+            loadMessages.run();
+        });
+
+        videoCallBtn.addActionListener(e -> {
+            String sender = Database.currentUser != null ? Database.currentUser.name : "Guest";
+            String time = new SimpleDateFormat("HH:mm").format(new Date());
+            Database.addChatMessage(new ChatMessage(sender, "[CALL]:Video Call", time));
+            loadMessages.run();
+        });
+
+        micBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            private Timer recordTimer;
+            private int seconds = 0;
+            
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                micBtn.setText("🔴 0:00");
+                micBtn.setForeground(Color.RED);
+                seconds = 0;
+                recordTimer = new Timer(1000, evt -> {
+                    seconds++;
+                    micBtn.setText("🔴 0:0" + seconds);
+                });
+                recordTimer.start();
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                if (recordTimer != null) recordTimer.stop();
+                micBtn.setText("🎤");
+                micBtn.setForeground(Color.WHITE);
+                if (seconds > 0) {
+                    String sender = Database.currentUser != null ? Database.currentUser.name : "Guest";
+                    String time = new SimpleDateFormat("HH:mm").format(new Date());
+                    Database.addChatMessage(new ChatMessage(sender, "[VOICENOTE]0:0" + seconds, time));
+                    loadMessages.run();
+                }
+            }
+        });
 
         // Initial load
         loadMessages.run();

@@ -12,13 +12,66 @@ public class AIPanel {
     private static final List<ChatMessage> aiHistory = new ArrayList<>();
     private static JPanel chatBox;
     private static JScrollPane scrollPane;
+    private static double aiPulse = 0;
+    private static boolean isThinking = false;
 
     public static JPanel build() {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIUtils.BG);
 
-        // Header
-        root.add(UIUtils.pageHeader("SCOSS AI Assistant", "Your smart campus guide. Ask me anything!"), BorderLayout.NORTH);
+        // Top AI Graphic Panel
+        JPanel aiGraphicPanel = new JPanel() {
+            private Timer pulseTimer;
+            {
+                setOpaque(false);
+                setPreferredSize(new Dimension(0, 150));
+                pulseTimer = new Timer(16, e -> {
+                    aiPulse += isThinking ? 0.2 : 0.05;
+                    repaint();
+                });
+                pulseTimer.start();
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int cx = getWidth() / 2;
+                int cy = getHeight() / 2;
+
+                // Pulsing glow
+                for (int i = 0; i < 5; i++) {
+                    int glowSize = 60 + (i * 15) + (int)(Math.sin(aiPulse) * 10);
+                    if (isThinking) glowSize += (int)(Math.sin(aiPulse * 2) * 15);
+                    
+                    Color base = isThinking ? new Color(255, 100, 100) : UIUtils.ACCENT;
+                    g2.setColor(new Color(base.getRed(), base.getGreen(), base.getBlue(), 30 - (i * 5)));
+                    g2.fillOval(cx - glowSize/2, cy - glowSize/2, glowSize, glowSize);
+                }
+
+                // Core
+                g2.setColor(isThinking ? new Color(255, 100, 100) : UIUtils.ACCENT);
+                g2.fillOval(cx - 25, cy - 25, 50, 50);
+
+                // Inner Core
+                g2.setColor(Color.WHITE);
+                g2.fillOval(cx - 10, cy - 10, 20, 20);
+
+                // Orbiting ring
+                g2.setStroke(new BasicStroke(3));
+                g2.setColor(new Color(255, 255, 255, 150));
+                g2.drawArc(cx - 35, cy - 35, 70, 70, (int)(aiPulse * 50) % 360, 100);
+                g2.drawArc(cx - 35, cy - 35, 70, 70, ((int)(aiPulse * 50) + 180) % 360, 100);
+            }
+        };
+        
+        JPanel headerWrap = new JPanel(new BorderLayout());
+        headerWrap.setBackground(UIUtils.BG);
+        headerWrap.add(UIUtils.pageHeader("SCOSS AI Assistant", "Your smart campus guide. Ask me anything!"), BorderLayout.NORTH);
+        headerWrap.add(aiGraphicPanel, BorderLayout.CENTER);
+        root.add(headerWrap, BorderLayout.NORTH);
 
         // Chat History Area
         chatBox = new JPanel();
@@ -62,10 +115,13 @@ public class AIPanel {
             messageField.setText("");
             renderMessages();
             
+            isThinking = true;
+            
             // Simulate AI thinking
-            Timer typingTimer = new Timer(1000, e -> {
+            Timer typingTimer = new Timer(2000, e -> {
                 String response = generateAIResponse(text);
                 aiHistory.add(new ChatMessage("SCOSS AI", response, getTime()));
+                isThinking = false;
                 renderMessages();
                 VoiceGuide.speak(response); // Read the response out loud
             });
