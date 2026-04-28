@@ -64,26 +64,95 @@ public class UIUtils {
     }
 
     public static JButton primaryBtn(String text) {
-        JButton b = new JButton(text);
+        JButton b = new JButton(text) {
+            private float alpha = 0f;
+            private Timer animTimer;
+            {
+                addMouseListener(new MouseAdapter() {
+                    @Override public void mouseEntered(MouseEvent e) { startAnim(1f); }
+                    @Override public void mouseExited(MouseEvent e) { startAnim(0f); }
+                });
+            }
+            private void startAnim(float target) {
+                if (animTimer != null) animTimer.stop();
+                animTimer = new Timer(15, e -> {
+                    alpha += (target - alpha) * 0.3f;
+                    if (Math.abs(target - alpha) < 0.01f) { alpha = target; animTimer.stop(); }
+                    repaint();
+                });
+                animTimer.start();
+            }
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth(); int h = getHeight();
+                g2.setColor(ACCENT);
+                g2.fillRoundRect(0, 0, w, h, 10, 10);
+                if (alpha > 0) {
+                    g2.setColor(new Color(255, 255, 255, (int)(alpha * 40)));
+                    g2.fillRoundRect(0, 0, w, h, 10, 10);
+                }
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = (w - fm.stringWidth(getText())) / 2;
+                int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
+                g2.setColor(Color.WHITE);
+                g2.drawString(getText(), tx, ty);
+            }
+        };
         b.setFont(fontBold);
         b.setForeground(Color.WHITE);
-        b.setBackground(ACCENT);
+        b.setContentAreaFilled(false);
         b.setFocusPainted(false);
         b.setBorderPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.setBorder(BorderFactory.createEmptyBorder(8,18,8,18));
+        b.setBorder(BorderFactory.createEmptyBorder(10,20,10,20));
         return b;
     }
 
     public static JButton secondaryBtn(String text) {
-        JButton b = new JButton(text);
+        JButton b = new JButton(text) {
+            private float alpha = 0f;
+            private Timer animTimer;
+            {
+                addMouseListener(new MouseAdapter() {
+                    @Override public void mouseEntered(MouseEvent e) { startAnim(1f); }
+                    @Override public void mouseExited(MouseEvent e) { startAnim(0f); }
+                });
+            }
+            private void startAnim(float target) {
+                if (animTimer != null) animTimer.stop();
+                animTimer = new Timer(15, e -> {
+                    alpha += (target - alpha) * 0.3f;
+                    if (Math.abs(target - alpha) < 0.01f) { alpha = target; animTimer.stop(); }
+                    repaint();
+                });
+                animTimer.start();
+            }
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth(); int h = getHeight();
+                g2.setColor(lighter(ACCENT));
+                g2.fillRoundRect(0, 0, w, h, 10, 10);
+                if (alpha > 0) {
+                    g2.setColor(new Color(ACCENT.getRed(), ACCENT.getGreen(), ACCENT.getBlue(), (int)(alpha * 40)));
+                    g2.fillRoundRect(0, 0, w, h, 10, 10);
+                }
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = (w - fm.stringWidth(getText())) / 2;
+                int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
+                g2.setColor(ACCENT);
+                g2.drawString(getText(), tx, ty);
+            }
+        };
         b.setFont(fontNormal);
-        b.setForeground(ACCENT);
-        b.setBackground(lighter(ACCENT));
+        b.setContentAreaFilled(false);
         b.setFocusPainted(false);
         b.setBorderPainted(false);
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        b.setBorder(BorderFactory.createEmptyBorder(7,14,7,14));
+        b.setBorder(BorderFactory.createEmptyBorder(8,16,8,16));
         return b;
     }
 

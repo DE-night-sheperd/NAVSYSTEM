@@ -8,14 +8,49 @@ public class LoginPanel {
     }
 
     public static JPanel build(JFrame mainFrame, LoginListener listener) {
-        JPanel root = new JPanel(new GridBagLayout());
+        JPanel root = new JPanel(new GridBagLayout()) {
+            private float alpha = 0f;
+            private int yOffset = 50;
+            private Timer anim;
+            {
+                anim = new Timer(15, e -> {
+                    alpha += 0.05f;
+                    yOffset -= 3;
+                    if (alpha >= 1f) { alpha = 1f; yOffset = 0; anim.stop(); }
+                    repaint();
+                });
+                anim.start();
+            }
+            @Override
+            protected void paintChildren(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+                g2.translate(0, yOffset);
+                super.paintChildren(g2);
+                g2.dispose();
+            }
+        };
         root.setBackground(UIUtils.NAVY);
 
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
-        card.setPreferredSize(new Dimension(400, 500));
+        // Use a rounded border for the card
+        card.setOpaque(false);
+        JPanel cardWrapper = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                super.paintComponent(g);
+            }
+        };
+        cardWrapper.setOpaque(false);
+        cardWrapper.add(card);
+        cardWrapper.setPreferredSize(new Dimension(400, 500));
 
         JLabel logo = new JLabel("SCOSS", SwingConstants.CENTER);
         logo.setFont(new Font("SansSerif", Font.BOLD, 32));
@@ -75,7 +110,7 @@ public class LoginPanel {
         card.add(signup); card.add(Box.createVerticalStrut(12));
         card.add(msg);
 
-        root.add(card);
+        root.add(cardWrapper);
         return root;
     }
 }

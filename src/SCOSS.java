@@ -23,11 +23,22 @@ public class SCOSS {
             frame.setSize(1100, 750);
             frame.setLocationRelativeTo(null);
 
-            // Start with Login
-            showLogin(frame);
+            // Start with Splash Screen
+            showSplash(frame);
 
             frame.setVisible(true);
         });
+    }
+
+    private static void showSplash(JFrame frame) {
+        frame.getContentPane().removeAll();
+        SplashPanel splash = new SplashPanel(() -> {
+            showLogin(frame);
+        });
+        frame.add(splash);
+        frame.revalidate();
+        frame.repaint();
+        splash.start();
     }
 
     private static void showLogin(JFrame frame) {

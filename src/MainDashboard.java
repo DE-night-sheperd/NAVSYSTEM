@@ -33,6 +33,7 @@ public class MainDashboard extends JPanel {
 
         // Define Navigation based on role
         addNavItem(sidebar, "Home", "home", HomePanel.build());
+        addNavItem(sidebar, "My Profile", "profile", ProfilePanel.build());
         addNavItem(sidebar, "Campus Map", "map", NavigationPanel.build());
         addNavItem(sidebar, "QR Scanner", "qr", QRPanel.build());
 
