@@ -65,7 +65,7 @@ public class SplashPanel extends JPanel {
                 if (aiAlpha <= 0.0f) {
                     aiAlpha = 0.0f;
                     textAlpha = 0.0f;
-                    animationTimer.stop();
+                    ((Timer)e.getSource()).stop();
                     if (this.onComplete != null) {
                         this.onComplete.run();
                     }
