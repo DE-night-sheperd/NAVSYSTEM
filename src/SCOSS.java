@@ -32,8 +32,31 @@ public class SCOSS {
 
     private static void showLogin(JFrame frame) {
         frame.getContentPane().removeAll();
-        frame.add(LoginPanel.build(frame, () -> {
-            showDashboard(frame);
+        frame.add(LoginPanel.build(frame, new LoginPanel.LoginListener() {
+            @Override
+            public void onLoginSuccess() {
+                showDashboard(frame);
+            }
+            @Override
+            public void onSignupClicked() {
+                showSignup(frame);
+            }
+        }));
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    private static void showSignup(JFrame frame) {
+        frame.getContentPane().removeAll();
+        frame.add(SignupPanel.build(frame, new SignupPanel.SignupListener() {
+            @Override
+            public void onSignupComplete() {
+                showLogin(frame);
+            }
+            @Override
+            public void onCancel() {
+                showLogin(frame);
+            }
         }));
         frame.revalidate();
         frame.repaint();

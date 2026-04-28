@@ -71,7 +71,25 @@ public class NavigationPanel {
         
         details.add(detailsText, BorderLayout.CENTER);
         
-        // View toggle button
+        // Buttons and Voice Guide
+        JPanel btnPanel = new JPanel();
+        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
+        btnPanel.setBackground(UIUtils.CARD);
+        
+        JCheckBox voiceToggle = new JCheckBox("Enable Voice Guide");
+        voiceToggle.setBackground(UIUtils.CARD);
+        voiceToggle.setFont(UIUtils.fontSmall);
+        voiceToggle.addActionListener(e -> VoiceGuide.isEnabled = voiceToggle.isSelected());
+        
+        JButton navBtn = UIUtils.primaryBtn("Navigate Here");
+        navBtn.setEnabled(false);
+        navBtn.addActionListener(e -> {
+            if (locList.getSelectedIndex() >= 0) {
+                Location loc = currentLocations.get(locList.getSelectedIndex());
+                mapCanvas.startNavigation(loc);
+            }
+        });
+
         JButton toggleView = UIUtils.secondaryBtn("Switch to Map View");
         toggleView.addActionListener(e -> {
             if (toggleView.getText().contains("Map")) {
@@ -82,9 +100,20 @@ public class NavigationPanel {
                 toggleView.setText("Switch to Map View");
             }
         });
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnPanel.setBackground(UIUtils.CARD);
-        btnPanel.add(toggleView);
+        
+        JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        buttonRow.setBackground(UIUtils.CARD);
+        buttonRow.add(toggleView);
+        buttonRow.add(navBtn);
+        
+        JPanel voiceRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        voiceRow.setBackground(UIUtils.CARD);
+        voiceRow.add(voiceToggle);
+
+        btnPanel.add(voiceRow);
+        btnPanel.add(Box.createVerticalStrut(5));
+        btnPanel.add(buttonRow);
+        
         details.add(btnPanel, BorderLayout.EAST);
 
         right.add(details, BorderLayout.SOUTH);
@@ -94,9 +123,13 @@ public class NavigationPanel {
             if (!e.getValueIsAdjusting() && locList.getSelectedIndex() >= 0) {
                 Location loc = currentLocations.get(locList.getSelectedIndex());
                 mapCanvas.highlight(loc);
+                mapCanvas.stopNavigation();
                 detTitle.setText(loc.locationName + " — " + loc.category);
                 detInfo.setText("Building: " + loc.building + "   QR: " + loc.qrCodeData);
                 detCoord.setText("Lat: " + loc.latitude + "   Lon: " + loc.longitude);
+                navBtn.setEnabled(true);
+            } else {
+                navBtn.setEnabled(false);
             }
         });
 

@@ -4,6 +4,7 @@ import java.awt.*;
 public class LoginPanel {
     public interface LoginListener {
         void onLoginSuccess();
+        void onSignupClicked();
     }
 
     public static JPanel build(JFrame mainFrame, LoginListener listener) {
@@ -37,6 +38,10 @@ public class LoginPanel {
         JButton login = UIUtils.primaryBtn("Sign In");
         login.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
+        JButton signup = UIUtils.secondaryBtn("Create Account");
+        signup.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        signup.addActionListener(e -> listener.onSignupClicked());
+
         JLabel msg = new JLabel(" ", SwingConstants.CENTER);
         msg.setFont(UIUtils.fontSmall);
         msg.setForeground(UIUtils.DANGER);
@@ -66,6 +71,8 @@ public class LoginPanel {
         card.add(pass); card.add(Box.createVerticalStrut(24));
         login.setAlignmentX(Component.LEFT_ALIGNMENT);
         card.add(login); card.add(Box.createVerticalStrut(12));
+        signup.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.add(signup); card.add(Box.createVerticalStrut(12));
         card.add(msg);
 
         root.add(card);

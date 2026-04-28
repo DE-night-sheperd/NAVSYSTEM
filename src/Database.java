@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.*;
 
 public class Database {
     public static List<User> users = new ArrayList<>();
@@ -17,12 +18,7 @@ public class Database {
 
     public static void seedData() {
         // Users
-        users.add(new User(1, "Michelle Machate", "michelle@spu.ac.za", "pass123", "student"));
-        users.add(new User(2, "Thabo Mokoena", "thabo@spu.ac.za", "pass123", "student"));
-        users.add(new User(3, "Lerato Dlamini", "lerato@spu.ac.za", "pass123", "student"));
-        users.add(new User(4, "James Sithole", "james@spu.ac.za", "staff123", "staff"));
-        users.add(new User(5, "Nomsa Khumalo", "nomsa@spu.ac.za", "staff123", "staff"));
-        users.add(new User(6, "Choza Mamabolo", "manager@uni.ac.za", "mgr123", "manager"));
+        loadUsers();
 
         // SPU Locations
         locations.add(new Location(1, "Moroka Hall of Residence (C001)", "Central Campus", "Residence", -28.7455, 24.7670, "QR-C001"));
@@ -50,6 +46,51 @@ public class Database {
         // Updates
         requestUpdates.add(new RequestUpdate(1, 1, 3, "Assigned to tech team. Will inspect tomorrow.", "2026-04-21"));
         requestUpdates.add(new RequestUpdate(2, 2, 4, "Registration processed. Student enrolled.", "2026-04-16"));
+    }
+
+    public static void loadUsers() {
+        File file = new File("users.txt");
+        if (!file.exists()) {
+            users.add(new User(1, "Michelle Machate", "michelle@spu.ac.za", "pass123", "student"));
+            users.add(new User(2, "Thabo Mokoena", "thabo@spu.ac.za", "pass123", "student"));
+            users.add(new User(3, "Lerato Dlamini", "lerato@spu.ac.za", "pass123", "student"));
+            users.add(new User(4, "James Sithole", "james@spu.ac.za", "staff123", "staff"));
+            users.add(new User(5, "Nomsa Khumalo", "nomsa@spu.ac.za", "staff123", "staff"));
+            users.add(new User(6, "Choza Mamabolo", "manager@uni.ac.za", "mgr123", "manager"));
+            saveUsers();
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            int maxId = 9;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5) {
+                    int id = Integer.parseInt(parts[0].trim());
+                    users.add(new User(id, parts[1].trim(), parts[2].trim(), parts[3].trim(), parts[4].trim()));
+                    if (id > maxId) maxId = id;
+                }
+            }
+            nextUserId = maxId + 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveUsers() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("users.txt"))) {
+            for (User u : users) {
+                pw.println(u.userId + "," + u.name + "," + u.email + "," + u.passwordHash + "," + u.role);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addUser(User user) {
+        users.add(user);
+        saveUsers();
     }
 
     public static User findUser(int id) {

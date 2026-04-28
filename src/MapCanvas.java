@@ -25,6 +25,15 @@ public class MapCanvas extends JPanel {
     private final int TILE_SIZE = 256;
     private boolean satelliteView = true;
 
+    // Navigation tracking
+    private boolean isNavigating = false;
+    private double navCurrentLat;
+    private double navCurrentLon;
+    private double navDestLat;
+    private double navDestLon;
+    private Timer navTimer;
+    private Location navDestLocation;
+
     // Interaction state
     private Point lastMousePos;
 
@@ -97,6 +106,68 @@ public class MapCanvas extends JPanel {
             if (zoom < 17) zoom = 17;
         }
         repaint(); 
+    }
+
+    public void startNavigation(Location dest) {
+        if (dest == null) return;
+        this.navDestLocation = dest;
+        this.navDestLat = dest.latitude;
+        this.navDestLon = dest.longitude;
+
+        // Set a simulated start location (e.g., SPU Main Entrance)
+        this.navCurrentLat = -28.7430;
+        this.navCurrentLon = 24.7660;
+
+        // Center map to see both points
+        this.centerLat = (navCurrentLat + navDestLat) / 2.0;
+        this.centerLon = (navCurrentLon + navDestLon) / 2.0;
+        this.zoom = 16;
+
+        this.isNavigating = true;
+
+        if (navTimer != null) navTimer.stop();
+
+        VoiceGuide.speak("Navigating to " + dest.locationName + ". Proceed along the highlighted path.");
+
+        navTimer = new Timer(150, e -> {
+            // Move current location 1% closer to destination per tick
+            double dLat = navDestLat - navCurrentLat;
+            double dLon = navDestLon - navCurrentLon;
+            
+            // Distance formula
+            double dist = Math.sqrt(dLat*dLat + dLon*dLon);
+            
+            if (dist < 0.0001) {
+                navTimer.stop();
+                isNavigating = false;
+                VoiceGuide.speak("You have arrived at " + dest.locationName);
+                repaint();
+                return;
+            }
+
+            // Move a fixed step size (simulating walking speed)
+            double step = 0.00005;
+            if (dist < step) {
+                navCurrentLat = navDestLat;
+                navCurrentLon = navDestLon;
+            } else {
+                navCurrentLat += (dLat / dist) * step;
+                navCurrentLon += (dLon / dist) * step;
+            }
+            
+            // Keep map centered on user
+            this.centerLat = navCurrentLat;
+            this.centerLon = navCurrentLon;
+
+            repaint();
+        });
+        navTimer.start();
+    }
+
+    public void stopNavigation() {
+        if (navTimer != null) navTimer.stop();
+        isNavigating = false;
+        repaint();
     }
 
     private Point2D.Double latLonToTileXY(double lat, double lon, int z) {
@@ -182,6 +253,32 @@ public class MapCanvas extends JPanel {
                     g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
                 }
             }
+        }
+
+        // Draw Navigation Trail
+        if (isNavigating && navDestLocation != null) {
+            Point2D.Double pCurrent = latLonToTileXY(navCurrentLat, navCurrentLon, zoom);
+            Point2D.Double pDest = latLonToTileXY(navDestLat, navDestLon, zoom);
+            
+            int curX = (int)((pCurrent.x - centerTile.x) * TILE_SIZE) + w/2;
+            int curY = (int)((pCurrent.y - centerTile.y) * TILE_SIZE) + h/2;
+            int dstX = (int)((pDest.x - centerTile.x) * TILE_SIZE) + w/2;
+            int dstY = (int)((pDest.y - centerTile.y) * TILE_SIZE) + h/2;
+
+            // Draw line
+            g2.setColor(new Color(59, 130, 246, 180)); // Blue, semi-transparent
+            g2.setStroke(new BasicStroke(4.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.drawLine(curX, curY, dstX, dstY);
+
+            // Draw Current Location Marker
+            g2.setColor(new Color(59, 130, 246, 50));
+            g2.fillOval(curX - 15, curY - 15, 30, 30); // Pulsing radius
+            
+            g2.setColor(new Color(255, 255, 255));
+            g2.fillOval(curX - 6, curY - 6, 12, 12); // Outer white ring
+            
+            g2.setColor(new Color(37, 99, 235));
+            g2.fillOval(curX - 4, curY - 4, 8, 8); // Inner blue dot
         }
 
         // Draw Locations
