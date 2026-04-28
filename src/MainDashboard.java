@@ -62,11 +62,30 @@ public class MainDashboard extends JPanel {
         logout.addActionListener(e -> {
             Database.currentUser = null;
             mainFrame.getContentPane().removeAll();
-            mainFrame.add(LoginPanel.build(mainFrame, () -> {
-                mainFrame.getContentPane().removeAll();
-                mainFrame.add(new MainDashboard(mainFrame));
-                mainFrame.revalidate();
-                mainFrame.repaint();
+            mainFrame.add(LoginPanel.build(mainFrame, new LoginPanel.LoginListener() {
+                @Override
+                public void onLoginSuccess() {
+                    mainFrame.getContentPane().removeAll();
+                    mainFrame.add(new MainDashboard(mainFrame));
+                    mainFrame.revalidate();
+                    mainFrame.repaint();
+                }
+                @Override
+                public void onSignupClicked() {
+                    mainFrame.getContentPane().removeAll();
+                    mainFrame.add(SignupPanel.build(mainFrame, new SignupPanel.SignupListener() {
+                        @Override
+                        public void onSignupComplete() {
+                            logout.doClick();
+                        }
+                        @Override
+                        public void onCancel() {
+                            logout.doClick();
+                        }
+                    }));
+                    mainFrame.revalidate();
+                    mainFrame.repaint();
+                }
             }));
             mainFrame.revalidate();
             mainFrame.repaint();

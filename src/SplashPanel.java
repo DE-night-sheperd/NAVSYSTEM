@@ -22,7 +22,7 @@ public class SplashPanel extends JPanel {
 
     public SplashPanel(Runnable onComplete) {
         this.onComplete = onComplete;
-        setBackground(UIUtils.BACKGROUND);
+        setBackground(UIUtils.BG);
         
         // Timer for 60fps animation
         animationTimer = new Timer(16, e -> {
@@ -98,7 +98,7 @@ public class SplashPanel extends JPanel {
             
             int size = 80;
             g2.setStroke(new BasicStroke(8, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2.setColor(UIUtils.PRIMARY);
+            g2.setColor(UIUtils.ACCENT);
             g2.draw(new RoundRectangle2D.Double(-size/2, -size/2, size, size, 30, 30));
             
             g2.setColor(UIUtils.ACCENT);
@@ -107,7 +107,7 @@ public class SplashPanel extends JPanel {
             g2.fillPolygon(new int[]{-size/2+10, -size/2-10, -size/2+10}, new int[]{-10, 0, 10}, 3);
             g2.fillPolygon(new int[]{size/2-10, size/2+10, size/2-10}, new int[]{-10, 0, 10}, 3);
 
-            g2.setColor(UIUtils.PRIMARY);
+            g2.setColor(UIUtils.ACCENT);
             g2.fillOval(-15, -15, 30, 30);
             g2.setTransform(old);
 

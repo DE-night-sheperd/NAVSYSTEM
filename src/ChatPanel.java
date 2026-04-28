@@ -99,7 +99,7 @@ public class ChatPanel {
                     JButton joinBtn = UIUtils.primaryBtn("Join " + callType);
                     joinBtn.setBackground(new Color(34, 197, 94)); // Green for join
                     joinBtn.addActionListener(e -> {
-                        JOptionPane.showMessageLabel(null, "Connecting to " + callType + "...", "Call", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Connecting to " + callType + "...", "Call", JOptionPane.INFORMATION_MESSAGE);
                     });
                     
                     JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));

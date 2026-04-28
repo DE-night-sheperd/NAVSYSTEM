@@ -7,7 +7,7 @@ public class ProfilePanel {
 
     public static JPanel build() {
         JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(UIUtils.BACKGROUND);
+        root.setBackground(UIUtils.BG);
         root.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
         JPanel header = new JPanel(new BorderLayout());
@@ -48,7 +48,7 @@ public class ProfilePanel {
                 int x = (getWidth() - size) / 2;
                 int y = (getHeight() - size) / 2;
 
-                g2.setColor(UIUtils.PRIMARY);
+                g2.setColor(UIUtils.ACCENT);
                 g2.fillOval(x, y, size, size);
 
                 g2.setColor(Color.WHITE);
@@ -78,7 +78,7 @@ public class ProfilePanel {
 
         gbc.gridy++;
         gbc.insets = new Insets(0, 0, 20, 20);
-        JTextField nameField = UIUtils.textField(Database.currentUser != null ? Database.currentUser.name : "");
+        JTextField nameField = UIUtils.styledField(Database.currentUser != null ? Database.currentUser.name : "");
         nameField.setPreferredSize(new Dimension(300, 40));
         content.add(nameField, gbc);
 
@@ -91,7 +91,7 @@ public class ProfilePanel {
 
         gbc.gridy++;
         gbc.insets = new Insets(0, 0, 20, 20);
-        JTextField emailField = UIUtils.textField(Database.currentUser != null ? Database.currentUser.email : "");
+        JTextField emailField = UIUtils.styledField(Database.currentUser != null ? Database.currentUser.email : "");
         emailField.setPreferredSize(new Dimension(300, 40));
         emailField.setEditable(false); // Email usually isn't editable
         content.add(emailField, gbc);
@@ -105,7 +105,7 @@ public class ProfilePanel {
 
         gbc.gridy++;
         gbc.insets = new Insets(0, 0, 20, 20);
-        JTextField roleField = UIUtils.textField(Database.currentUser != null ? Database.currentUser.role.substring(0, 1).toUpperCase() + Database.currentUser.role.substring(1) : "");
+        JTextField roleField = UIUtils.styledField(Database.currentUser != null ? Database.currentUser.role.substring(0, 1).toUpperCase() + Database.currentUser.role.substring(1) : "");
         roleField.setPreferredSize(new Dimension(300, 40));
         roleField.setEditable(false);
         content.add(roleField, gbc);
@@ -118,11 +118,11 @@ public class ProfilePanel {
         saveBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                saveBtn.setBackground(UIUtils.PRIMARY.brighter());
+                saveBtn.setBackground(UIUtils.ACCENT.brighter());
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                saveBtn.setBackground(UIUtils.PRIMARY);
+                saveBtn.setBackground(UIUtils.ACCENT);
             }
         });
 
