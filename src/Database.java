@@ -7,6 +7,7 @@ public class Database {
     public static List<Service> services = new ArrayList<>();
     public static List<Request> requests = new ArrayList<>();
     public static List<RequestUpdate> requestUpdates = new ArrayList<>();
+    public static List<ChatMessage> chatMessages = new ArrayList<>();
     
     public static User currentUser = null;
 
@@ -19,6 +20,9 @@ public class Database {
     public static void seedData() {
         // Users
         loadUsers();
+        
+        // Chat
+        loadChat();
 
         // SPU Locations
         locations.add(new Location(1, "Moroka Hall of Residence (C001)", "Central Campus", "Residence", -28.7455, 24.7670, "QR-C001"));
@@ -91,6 +95,43 @@ public class Database {
     public static void addUser(User user) {
         users.add(user);
         saveUsers();
+    }
+
+    public static void loadChat() {
+        File file = new File("chat.txt");
+        if (!file.exists()) {
+            chatMessages.add(new ChatMessage("System", "Welcome to the SCOSS Campus Chat!", "10:00"));
+            chatMessages.add(new ChatMessage("James Sithole", "Hello everyone! Don't forget the IT seminar today at 2 PM.", "10:05"));
+            saveChat();
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\\|", 3);
+                if (parts.length >= 3) {
+                    chatMessages.add(new ChatMessage(parts[0].trim(), parts[2].trim(), parts[1].trim()));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveChat() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("chat.txt"))) {
+            for (ChatMessage msg : chatMessages) {
+                // Format: Sender|Time|Text (Pipe delimited to allow commas in text)
+                pw.println(msg.sender + "|" + msg.timestamp + "|" + msg.text);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void addChatMessage(ChatMessage msg) {
+        chatMessages.add(msg);
+        saveChat();
     }
 
     public static User findUser(int id) {

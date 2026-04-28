@@ -36,6 +36,8 @@ public class MainDashboard extends JPanel {
         addNavItem(sidebar, "My Profile", "profile", ProfilePanel.build());
         addNavItem(sidebar, "Campus Map", "map", NavigationPanel.build());
         addNavItem(sidebar, "QR Scanner", "qr", QRPanel.build());
+        addNavItem(sidebar, "Nearby Chat", "chat", ChatPanel.build());
+        addNavItem(sidebar, "AI Assistant", "ai", AIPanel.build());
 
         if ("student".equals(Database.currentUser.role)) {
             addNavItem(sidebar, "My Requests", "requests", RequestsPanel.build());
