@@ -32,24 +32,25 @@ public class MainDashboard extends JPanel {
         contentPanel = new JPanel(cardLayout);
 
         // Define Navigation based on role with icons
-        addNavItem(sidebar, "🏠", "home", HomePanel.build());
-        addNavItem(sidebar, "👤", "profile", ProfilePanel.build());
-        addNavItem(sidebar, "🗺️", "map", NavigationPanel.build());
-        addNavItem(sidebar, "📷", "qr", QRPanel.build());
+        addNavItem(sidebar, "\uD83C\uDFE0", "home", HomePanel.build());
+        addNavItem(sidebar, "\uD83D\uDC64", "profile", ProfilePanel.build());
+        addNavItem(sidebar, "\uD83D\uDDFA\uFE0F", "map", NavigationPanel.build());
+        addNavItem(sidebar, "\uD83D\uDCF7", "qr", QRPanel.build());
+        addNavItem(sidebar, "\uD83E\uDD16", "ai", AIPanel.build());
 
         if ("student".equals(Database.currentUser.role)) {
-            addNavItem(sidebar, "📝", "requests", RequestsPanel.build());
+            addNavItem(sidebar, "\uD83D\uDCDD", "requests", RequestsPanel.build());
         } else if ("staff".equals(Database.currentUser.role)) {
-            addNavItem(sidebar, "🛠️", "staff_tasks", StaffPanel.build(mainFrame));
+            addNavItem(sidebar, "\uD83D\uDEE0\uFE0F", "staff_tasks", StaffPanel.build(mainFrame));
         } else if ("manager".equals(Database.currentUser.role)) {
-            addNavItem(sidebar, "📍", "locations", LocationsPanel.build(mainFrame));
-            addNavItem(sidebar, "⚙️", "services", ServicesPanel.build(mainFrame));
-            addNavItem(sidebar, "👷", "staff_tasks", StaffPanel.build(mainFrame));
+            addNavItem(sidebar, "\uD83D\uDCCD", "locations", LocationsPanel.build(mainFrame));
+            addNavItem(sidebar, "\u2699\uFE0F", "services", ServicesPanel.build(mainFrame));
+            addNavItem(sidebar, "\uD83D\uDC77", "staff_tasks", StaffPanel.build(mainFrame));
         }
 
         sidebar.add(Box.createVerticalGlue());
 
-        JButton logout = new JButton("🚪");
+        JButton logout = new JButton("\uD83D\uDEAA");
         logout.setToolTipText("Sign Out");
         logout.setFont(new Font("SansSerif", Font.PLAIN, 20));
         logout.setForeground(new Color(255, 255, 255, 180));

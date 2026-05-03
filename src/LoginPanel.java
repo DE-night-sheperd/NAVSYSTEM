@@ -11,9 +11,7 @@ public class LoginPanel {
         JPanel root = new JPanel(new GridBagLayout()) {
             private Image bgImage;
             {
-                // Attempt to load background image
                 try {
-                    // Using the filename found in the directory: backround.jpeg
                     bgImage = new ImageIcon("backround.jpeg").getImage(); 
                 } catch (Exception e) {}
             }
@@ -23,85 +21,71 @@ public class LoginPanel {
                 super.paintComponent(g);
                 if (bgImage != null) {
                     g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
-                    // Add a dark overlay to make text readable
-                    g.setColor(new Color(0, 0, 0, 100));
+                    g.setColor(new Color(15, 23, 42, 160)); // Modern dark blue/slate overlay
                     g.fillRect(0, 0, getWidth(), getHeight());
                 } else {
-                    g.setColor(UIUtils.NAVY);
+                    g.setColor(new Color(15, 23, 42));
                     g.fillRect(0, 0, getWidth(), getHeight());
                 }
             }
+        };
 
-            private float alpha = 0f;
-            private int yOffset = 50;
-            private Timer anim;
-            {
-                anim = new Timer(15, e -> {
-                    alpha += 0.05f;
-                    yOffset -= 3;
-                    if (alpha >= 1f) { alpha = 1f; yOffset = 0; anim.stop(); }
-                    repaint();
-                });
-                anim.start();
-            }
+        // Glass-morphism inspired card
+        JPanel card = new JPanel() {
             @Override
-            protected void paintChildren(Graphics g) {
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-                g2.translate(0, yOffset);
-                super.paintChildren(g2);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Semi-transparent white background
+                g2.setColor(new Color(255, 255, 255, 240));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                
+                // Subtle border
+                g2.setColor(new Color(255, 255, 255, 50));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 30, 30);
+                
                 g2.dispose();
             }
         };
-        // root.setBackground(UIUtils.NAVY); // Handled in paintComponent
-
-        JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
-        // Use a rounded border for the card
         card.setOpaque(false);
-        JPanel cardWrapper = new JPanel(new BorderLayout()) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-                super.paintComponent(g);
-            }
-        };
-        cardWrapper.setOpaque(false);
-        cardWrapper.add(card);
-        cardWrapper.setPreferredSize(new Dimension(400, 500));
+        card.setBorder(BorderFactory.createEmptyBorder(45, 40, 45, 40));
+        card.setPreferredSize(new Dimension(420, 580));
 
         JLabel logo = new JLabel("SCOSS", SwingConstants.CENTER);
-        logo.setFont(new Font("SansSerif", Font.BOLD, 32));
-        logo.setForeground(UIUtils.ACCENT);
+        logo.setFont(new Font("Inter", Font.BOLD, 42));
+        logo.setForeground(UIUtils.NAVY);
         logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel sub = new JLabel("Smart Campus Online Service System", SwingConstants.CENTER);
-        sub.setFont(UIUtils.fontSmall);
+        JLabel sub = new JLabel("Smart Campus Orientation", SwingConstants.CENTER);
+        sub.setFont(new Font("Inter", Font.PLAIN, 14));
         sub.setForeground(UIUtils.TEXT2);
         sub.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JTextField email = UIUtils.styledField("Email Address");
-        JPasswordField pass = new JPasswordField();
-        pass.setFont(UIUtils.fontNormal);
-        pass.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UIUtils.BORDER),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)
-        ));
+        // Input Styling
+        JTextField email = createModernField("Email Address", "\uD83D\uDCE7");
+        JPasswordField pass = createModernPasswordField("Password", "\uD83D\uDD12");
 
         JButton login = UIUtils.primaryBtn("Sign In");
-        login.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        login.setPreferredSize(new Dimension(Integer.MAX_VALUE, 48));
+        login.setFont(new Font("Inter", Font.BOLD, 15));
 
-        JButton signup = UIUtils.secondaryBtn("Create Account");
-        signup.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        JButton signup = new JButton("Don't have an account? Create one") {
+            {
+                setContentAreaFilled(false);
+                setBorderPainted(false);
+                setFocusPainted(false);
+                setForeground(UIUtils.ACCENT);
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                setFont(new Font("Inter", Font.PLAIN, 13));
+            }
+        };
         signup.addActionListener(e -> listener.onSignupClicked());
 
         JLabel msg = new JLabel(" ", SwingConstants.CENTER);
-        msg.setFont(UIUtils.fontSmall);
+        msg.setFont(new Font("Inter", Font.MEDIUM, 12));
         msg.setForeground(UIUtils.DANGER);
         msg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -117,23 +101,89 @@ public class LoginPanel {
             }
         });
 
-        card.add(logo); card.add(Box.createVerticalStrut(4));
-        card.add(sub); card.add(Box.createVerticalStrut(40));
-        card.add(new JLabel("Email")); card.add(Box.createVerticalStrut(6));
-        email.setAlignmentX(Component.LEFT_ALIGNMENT);
-        email.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        card.add(email); card.add(Box.createVerticalStrut(16));
-        card.add(new JLabel("Password")); card.add(Box.createVerticalStrut(6));
-        pass.setAlignmentX(Component.LEFT_ALIGNMENT);
-        pass.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        card.add(pass); card.add(Box.createVerticalStrut(24));
-        login.setAlignmentX(Component.LEFT_ALIGNMENT);
-        card.add(login); card.add(Box.createVerticalStrut(12));
-        signup.setAlignmentX(Component.LEFT_ALIGNMENT);
-        card.add(signup); card.add(Box.createVerticalStrut(12));
+        // Layout Assembly
+        card.add(logo); 
+        card.add(Box.createVerticalStrut(8));
+        card.add(sub); 
+        card.add(Box.createVerticalStrut(45));
+        
+        card.add(email); 
+        card.add(Box.createVerticalStrut(20));
+        card.add(pass); 
+        card.add(Box.createVerticalStrut(30));
+        
+        login.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(login); 
+        card.add(Box.createVerticalStrut(20));
+        
+        signup.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(signup); 
+        card.add(Box.createVerticalStrut(15));
         card.add(msg);
 
-        root.add(cardWrapper);
+        root.add(card);
         return root;
     }
+
+    private static JTextField createModernField(String placeholder, String icon) {
+        JTextField f = new JTextField(placeholder) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(new Color(226, 232, 240));
+                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 12, 12);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        f.setOpaque(false);
+        f.setFont(new Font("Inter", Font.PLAIN, 14));
+        f.setForeground(new Color(100, 116, 139));
+        f.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+        f.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (f.getText().equals(placeholder)) { f.setText(""); f.setForeground(UIUtils.TEXT1); }
+            }
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (f.getText().isEmpty()) { f.setText(placeholder); f.setForeground(new Color(100, 116, 139)); }
+            }
+        });
+        return f;
+    }
+
+    private static JPasswordField createModernPasswordField(String placeholder, String icon) {
+        JPasswordField f = new JPasswordField(placeholder) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(248, 250, 252));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                g2.setColor(new Color(226, 232, 240));
+                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 12, 12);
+                super.paintComponent(g);
+                g2.dispose();
+            }
+        };
+        f.setOpaque(false);
+        f.setEchoChar((char)0);
+        f.setFont(new Font("Inter", Font.PLAIN, 14));
+        f.setForeground(new Color(100, 116, 139));
+        f.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+        f.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent e) {
+                String pass = new String(f.getPassword());
+                if (pass.equals(placeholder)) { f.setText(""); f.setEchoChar('\u2022'); f.setForeground(UIUtils.TEXT1); }
+            }
+            public void focusLost(java.awt.event.FocusEvent e) {
+                String pass = new String(f.getPassword());
+                if (pass.isEmpty()) { f.setText(placeholder); f.setEchoChar((char)0); f.setForeground(new Color(100, 116, 139)); }
+            }
+        });
+        return f;
+    }
+}
 }

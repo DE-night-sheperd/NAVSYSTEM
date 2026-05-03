@@ -8,38 +8,72 @@ public class QRPanel {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             int size = Math.min(getWidth(), getHeight()) - 40;
-            if (size < 50) size = 50;
+            if (size < 100) size = 100;
             int x = (getWidth() - size) / 2;
             int y = (getHeight() - size) / 2;
             
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             
-            g2.setColor(Color.BLACK);
-            g2.fillRect(x, y, size, size);
+            // Background
             g2.setColor(Color.WHITE);
-            g2.fillRect(x + 4, y + 4, size - 8, size - 8);
-            
+            g2.fillRect(0, 0, getWidth(), getHeight());
+
+            // QR Border
             g2.setColor(Color.BLACK);
-            int cells = 15;
-            int cellSize = (size - 20) / cells;
-            int startOffset = x + 10;
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRect(x - 5, y - 5, size + 10, size + 10);
+
+            int cells = 21; // Standard QR-like grid
+            int cellSize = size / cells;
+            int startX = x + (size - (cells * cellSize)) / 2;
+            int startY = y + (size - (cells * cellSize)) / 2;
             
             long seed = currentData.hashCode();
             java.util.Random rnd = new java.util.Random(seed);
             
             for (int row = 0; row < cells; row++) {
                 for (int col = 0; col < cells; col++) {
-                    if ((row < 3 && col < 3) || (row < 3 && col > cells-4) || (row > cells-4 && col < 3)) {
-                        g2.fillRect(startOffset + col*cellSize, startOffset + row*cellSize, cellSize, cellSize);
+                    // Position Detection Patterns (the 3 large squares)
+                    if (isPositionPattern(row, col, cells)) {
+                        g2.setColor(Color.BLACK);
+                        if (isOuterPattern(row, col, cells)) {
+                            g2.fillRect(startX + col*cellSize, startY + row*cellSize, cellSize, cellSize);
+                        } else if (isInnerPattern(row, col, cells)) {
+                            g2.fillRect(startX + col*cellSize, startY + row*cellSize, cellSize, cellSize);
+                        }
                         continue;
                     }
+                    
+                    // Random-ish modules based on data
                     if (rnd.nextBoolean()) {
-                        g2.fillRect(startOffset + col*cellSize, startOffset + row*cellSize, cellSize, cellSize);
+                        g2.setColor(Color.BLACK);
+                        g2.fillRect(startX + col*cellSize, startY + row*cellSize, cellSize, cellSize);
                     }
                 }
             }
         }
+
+        private boolean isPositionPattern(int r, int c, int cells) {
+            return (r < 7 && c < 7) || (r < 7 && c > cells-8) || (r > cells-8 && c < 7);
+        }
+
+        private boolean isOuterPattern(int r, int c, int cells) {
+            // Check for the 7x7 outer square
+            if (r < 7 && c < 7) return (r == 0 || r == 6 || c == 0 || c == 6);
+            if (r < 7 && c > cells-8) return (r == 0 || r == 6 || c == cells-7 || c == cells-1);
+            if (r > cells-8 && c < 7) return (r == cells-7 || r == cells-1 || c == 0 || c == 6);
+            return false;
+        }
+
+        private boolean isInnerPattern(int r, int c, int cells) {
+            // Check for the 3x3 inner square
+            if (r >= 2 && r <= 4 && c >= 2 && c <= 4) return true;
+            if (r >= 2 && r <= 4 && c >= cells-5 && c <= cells-3) return true;
+            if (r >= cells-5 && r <= cells-3 && c >= 2 && c <= 4) return true;
+            return false;
+        }
+
         public void setData(String data) { this.currentData = data; repaint(); }
     }
 
