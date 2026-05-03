@@ -7,7 +7,6 @@ public class Database {
     public static List<Service> services = new ArrayList<>();
     public static List<Request> requests = new ArrayList<>();
     public static List<RequestUpdate> requestUpdates = new ArrayList<>();
-    public static List<ChatMessage> chatMessages = new ArrayList<>();
     
     public static User currentUser = null;
 
@@ -21,17 +20,24 @@ public class Database {
         // Users
         loadUsers();
         
-        // Chat
-        loadChat();
+        // SPU Locations - Central Campus
+        locations.add(new Location(1, "Moroka Hall (C001)", "Central Campus", "Residence", -28.7490, 24.7645, "QR-C001"));
+        locations.add(new Location(8, "Student Affairs (C002)", "Central Campus", "Admin", -28.7485, 24.7650, "QR-C002"));
+        locations.add(new Location(3, "Academic Building (C003)", "Central Campus", "Lecture Hall", -28.7458, 24.7668, "QR-C003"));
+        locations.add(new Location(2, "Library & Resources (C004)", "Central Campus", "Library", -28.7462, 24.7665, "QR-C004"));
+        locations.add(new Location(9, "Natural Sciences (C005)", "Central Campus", "Science", -28.7470, 24.7668, "QR-C005"));
+        locations.add(new Location(4, "Data Science & IT (C006)", "Central Campus", "IT Lab", -28.7463, 24.7670, "QR-C006"));
+        locations.add(new Location(10, "Humanities Labs (C010)", "Central Campus", "Arts", -28.7475, 24.7660, "QR-C010"));
+        locations.add(new Location(11, "Agricultural Sciences (C011)", "Central Campus", "Agriculture", -28.7480, 24.7670, "QR-C011"));
 
-        // SPU Locations
-        locations.add(new Location(1, "Moroka Hall of Residence (C001)", "Central Campus", "Residence", -28.7455, 24.7670, "QR-C001"));
-        locations.add(new Location(2, "Library & Student Resources (C004)", "Central Campus", "Library", -28.7462, 24.7680, "QR-C004"));
-        locations.add(new Location(3, "Academic Building (C003)", "Central Campus", "Lecture Hall", -28.7460, 24.7685, "QR-C003"));
-        locations.add(new Location(4, "Data Science & IT Labs (C006)", "Central Campus", "IT Lab", -28.7465, 24.7682, "QR-C006"));
+        // South Campus
         locations.add(new Location(5, "Windhoek Draught Park", "South Campus", "Sports", -28.7515, 24.7685, "QR-WDP"));
-        locations.add(new Location(6, "Umnandi Hall of Residence (S005)", "South Campus", "Residence", -28.7500, 24.7690, "QR-S005"));
-        locations.add(new Location(7, "North Campus Administration", "North Campus", "Admin Office", -28.7405, 24.7655, "QR-NCADMIN"));
+        locations.add(new Location(12, "Massouw Hall (S007)", "South Campus", "Residence", -28.7505, 24.7675, "QR-S007"));
+        locations.add(new Location(6, "Umnandi Hall (S005)", "South Campus", "Residence", -28.7500, 24.7690, "QR-S005"));
+        locations.add(new Location(13, "Tauana Hall (R002)", "South Campus", "Residence", -28.7520, 24.7680, "QR-R002"));
+
+        // North Campus
+        locations.add(new Location(7, "North Campus Admin", "North Campus", "Admin Office", -28.7405, 24.7655, "QR-NCADMIN"));
 
         // Services
         services.add(new Service(1, "IT Support", "Hardware/software issues", "IT Dept", 2, "ext 101"));
@@ -95,43 +101,6 @@ public class Database {
     public static void addUser(User user) {
         users.add(user);
         saveUsers();
-    }
-
-    public static void loadChat() {
-        File file = new File("chat.txt");
-        if (!file.exists()) {
-            chatMessages.add(new ChatMessage("System", "Welcome to the SCOSS Campus Chat!", "10:00"));
-            chatMessages.add(new ChatMessage("James Sithole", "Hello everyone! Don't forget the IT seminar today at 2 PM.", "10:05"));
-            saveChat();
-            return;
-        }
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split("\\|", 3);
-                if (parts.length >= 3) {
-                    chatMessages.add(new ChatMessage(parts[0].trim(), parts[2].trim(), parts[1].trim()));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void saveChat() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter("chat.txt"))) {
-            for (ChatMessage msg : chatMessages) {
-                // Format: Sender|Time|Text (Pipe delimited to allow commas in text)
-                pw.println(msg.sender + "|" + msg.timestamp + "|" + msg.text);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void addChatMessage(ChatMessage msg) {
-        chatMessages.add(msg);
-        saveChat();
     }
 
     public static User findUser(int id) {

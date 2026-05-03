@@ -104,10 +104,10 @@ public class LiveLocationService {
                         
                         // For campus testing: If the real IP location is too far from SPU (e.g. > 10km),
                         // clamp it near SPU so the user can actually see the campus map features!
-                        double distToSPU = Math.sqrt(Math.pow(lat - (-28.7460), 2) + Math.pow(lon - 24.7675, 2));
+                        double distToSPU = Math.sqrt(Math.pow(lat - (-28.7462), 2) + Math.pow(lon - 24.7665, 2));
                         if (distToSPU > 0.1) { 
-                            currentLat = -28.7430; // SPU Entrance roughly
-                            currentLon = 24.7660;
+                            currentLat = -28.7450; // SPU Entrance roughly
+                            currentLon = 24.7665;
                             System.out.println("Real location is far from SPU. Clamping to campus for testing.");
                         }
                     }

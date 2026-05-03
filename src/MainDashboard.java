@@ -17,13 +17,13 @@ public class MainDashboard extends JPanel {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(UIUtils.NAVY);
-        sidebar.setPreferredSize(new Dimension(240, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
+        sidebar.setPreferredSize(new Dimension(80, 0)); // Narrower rail
+        sidebar.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
-        JLabel logo = new JLabel("SCOSS", SwingConstants.CENTER);
-        logo.setFont(new Font("SansSerif", Font.BOLD, 24));
+        JLabel logo = new JLabel("S", SwingConstants.CENTER); // Minimalist logo
+        logo.setFont(new Font("SansSerif", Font.BOLD, 28));
         logo.setForeground(Color.WHITE);
-        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        logo.setAlignmentX(Component.CENTER_ALIGNMENT);
         sidebar.add(logo);
         sidebar.add(Box.createVerticalStrut(30));
 
@@ -31,34 +31,34 @@ public class MainDashboard extends JPanel {
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
-        // Define Navigation based on role
-        addNavItem(sidebar, "Home", "home", HomePanel.build());
-        addNavItem(sidebar, "My Profile", "profile", ProfilePanel.build());
-        addNavItem(sidebar, "Campus Map", "map", NavigationPanel.build());
-        addNavItem(sidebar, "QR Scanner", "qr", QRPanel.build());
-        addNavItem(sidebar, "Nearby Chat", "chat", ChatPanel.build());
-        addNavItem(sidebar, "AI Assistant", "ai", AIPanel.build());
+        // Define Navigation based on role with icons
+        addNavItem(sidebar, "🏠", "home", HomePanel.build());
+        addNavItem(sidebar, "👤", "profile", ProfilePanel.build());
+        addNavItem(sidebar, "🗺️", "map", NavigationPanel.build());
+        addNavItem(sidebar, "📷", "qr", QRPanel.build());
 
         if ("student".equals(Database.currentUser.role)) {
-            addNavItem(sidebar, "My Requests", "requests", RequestsPanel.build());
+            addNavItem(sidebar, "📝", "requests", RequestsPanel.build());
         } else if ("staff".equals(Database.currentUser.role)) {
-            addNavItem(sidebar, "Manage Tasks", "staff_tasks", StaffPanel.build(mainFrame));
+            addNavItem(sidebar, "🛠️", "staff_tasks", StaffPanel.build(mainFrame));
         } else if ("manager".equals(Database.currentUser.role)) {
-            addNavItem(sidebar, "Locations", "locations", LocationsPanel.build(mainFrame));
-            addNavItem(sidebar, "Services", "services", ServicesPanel.build(mainFrame));
-            addNavItem(sidebar, "Staff Tasks", "staff_tasks", StaffPanel.build(mainFrame));
+            addNavItem(sidebar, "📍", "locations", LocationsPanel.build(mainFrame));
+            addNavItem(sidebar, "⚙️", "services", ServicesPanel.build(mainFrame));
+            addNavItem(sidebar, "👷", "staff_tasks", StaffPanel.build(mainFrame));
         }
 
         sidebar.add(Box.createVerticalGlue());
 
-        JButton logout = new JButton("Sign Out");
-        logout.setFont(UIUtils.fontNormal);
-        logout.setForeground(new Color(226, 232, 240));
-        logout.setBackground(new Color(255, 255, 255, 20));
-        logout.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        JButton logout = new JButton("🚪");
+        logout.setToolTipText("Sign Out");
+        logout.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        logout.setForeground(new Color(255, 255, 255, 180));
+        logout.setBackground(UIUtils.NAVY);
+        logout.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         logout.setFocusPainted(false);
         logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        logout.setAlignmentX(Component.LEFT_ALIGNMENT);
+        logout.setAlignmentX(Component.CENTER_ALIGNMENT);
+        logout.setMaximumSize(new Dimension(80, 50));
         logout.addActionListener(e -> {
             Database.currentUser = null;
             mainFrame.getContentPane().removeAll();
@@ -103,19 +103,19 @@ public class MainDashboard extends JPanel {
         contentPanel.add(panel, key);
 
         JButton btn = new JButton(label);
-        btn.setFont(UIUtils.fontNormal);
-        btn.setForeground(new Color(148, 163, 184));
+        btn.setFont(new Font("SansSerif", Font.PLAIN, 24)); // Larger icons
+        btn.setForeground(new Color(255, 255, 255, 140));
         btn.setBackground(UIUtils.NAVY);
-        btn.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
-        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
+        btn.setHorizontalAlignment(SwingConstants.CENTER);
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(80, 60));
 
         btn.addActionListener(e -> showPage(key));
         sidebar.add(btn);
-        sidebar.add(Box.createVerticalStrut(4));
+        sidebar.add(Box.createVerticalStrut(2));
         navButtons.put(key, btn);
     }
 
@@ -124,9 +124,9 @@ public class MainDashboard extends JPanel {
         navButtons.forEach((k, b) -> {
             if (k.equals(key)) {
                 b.setForeground(Color.WHITE);
-                b.setBackground(new Color(255, 255, 255, 30));
+                b.setBackground(UIUtils.NAVY_LIGHT);
             } else {
-                b.setForeground(new Color(148, 163, 184));
+                b.setForeground(new Color(255, 255, 255, 140));
                 b.setBackground(UIUtils.NAVY);
             }
         });

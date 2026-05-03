@@ -19,8 +19,8 @@ public class MapCanvas extends JPanel {
     };
 
     // Map state
-    private double centerLat = -28.7460;
-    private double centerLon = 24.7675;
+    private double centerLat = -28.7462;
+    private double centerLon = 24.7665;
     private int zoom = 16;
     private final int TILE_SIZE = 256;
     private boolean satelliteView = true;

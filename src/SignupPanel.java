@@ -9,6 +9,27 @@ public class SignupPanel {
 
     public static JPanel build(JFrame mainFrame, SignupListener listener) {
         JPanel root = new JPanel(new GridBagLayout()) {
+            private Image bgImage;
+            {
+                try {
+                    // Using the filename found in the directory: backround.jpeg
+                    bgImage = new ImageIcon("backround.jpeg").getImage();
+                } catch (Exception e) {}
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bgImage != null) {
+                    g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+                    g.setColor(new Color(0, 0, 0, 100));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                } else {
+                    g.setColor(UIUtils.NAVY);
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+
             private float alpha = 0f;
             private int yOffset = 50;
             private Timer anim;
@@ -30,7 +51,7 @@ public class SignupPanel {
                 g2.dispose();
             }
         };
-        root.setBackground(UIUtils.NAVY);
+        // root.setBackground(UIUtils.NAVY);
 
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));

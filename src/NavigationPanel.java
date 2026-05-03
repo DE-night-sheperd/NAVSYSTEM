@@ -100,9 +100,19 @@ public class NavigationPanel {
                 toggleView.setText("Switch to Map View");
             }
         });
+
+        JButton pdfBtn = UIUtils.secondaryBtn("📄 2024 Campus Map (PDF)");
+        pdfBtn.addActionListener(e -> {
+            try {
+                Desktop.getDesktop().browse(new java.net.URI("https://spu.ac.za/wp-content/uploads/2019/08/2024-SPU-Campus-Maps-.pdf"));
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(root, "Could not open map URL.");
+            }
+        });
         
         JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         buttonRow.setBackground(UIUtils.CARD);
+        buttonRow.add(pdfBtn);
         buttonRow.add(toggleView);
         buttonRow.add(navBtn);
         

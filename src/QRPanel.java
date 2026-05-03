@@ -2,50 +2,96 @@ import javax.swing.*;
 import java.awt.*;
 
 public class QRPanel {
+    static class QRGraphic extends JPanel {
+        private String currentData = "SCAN-ME";
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            int size = Math.min(getWidth(), getHeight()) - 40;
+            if (size < 50) size = 50;
+            int x = (getWidth() - size) / 2;
+            int y = (getHeight() - size) / 2;
+            
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            g2.setColor(Color.BLACK);
+            g2.fillRect(x, y, size, size);
+            g2.setColor(Color.WHITE);
+            g2.fillRect(x + 4, y + 4, size - 8, size - 8);
+            
+            g2.setColor(Color.BLACK);
+            int cells = 15;
+            int cellSize = (size - 20) / cells;
+            int startOffset = x + 10;
+            
+            long seed = currentData.hashCode();
+            java.util.Random rnd = new java.util.Random(seed);
+            
+            for (int row = 0; row < cells; row++) {
+                for (int col = 0; col < cells; col++) {
+                    if ((row < 3 && col < 3) || (row < 3 && col > cells-4) || (row > cells-4 && col < 3)) {
+                        g2.fillRect(startOffset + col*cellSize, startOffset + row*cellSize, cellSize, cellSize);
+                        continue;
+                    }
+                    if (rnd.nextBoolean()) {
+                        g2.fillRect(startOffset + col*cellSize, startOffset + row*cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+        public void setData(String data) { this.currentData = data; repaint(); }
+    }
+
     public static JPanel build() {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIUtils.BG);
-        root.add(UIUtils.pageHeader("QR Code Interaction", "Scan or look up QR codes at campus points"), BorderLayout.NORTH);
+        root.add(UIUtils.pageHeader("QR Interactions", "Scan and Generate Scannable Codes"), BorderLayout.NORTH);
 
         JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(UIUtils.BG);
         body.setBorder(BorderFactory.createEmptyBorder(20,24,20,24));
 
-        // Scanner simulator
+        JPanel qrContainer = new JPanel(new GridLayout(1, 2, 20, 0));
+        qrContainer.setBackground(UIUtils.BG);
+        qrContainer.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
+
         JPanel scanBox = UIUtils.card();
         scanBox.setLayout(new BoxLayout(scanBox, BoxLayout.Y_AXIS));
-        scanBox.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UIUtils.ACCENT, 2, true),
-            BorderFactory.createEmptyBorder(20,20,20,20)
-        ));
-        scanBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 160));
-        scanBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JLabel scanIcon = new JLabel("▣  QR Code Scanner", SwingConstants.CENTER);
-        scanIcon.setFont(new Font("SansSerif", Font.BOLD, 16)); scanIcon.setForeground(UIUtils.ACCENT);
+        
+        JLabel scanIcon = new JLabel("▣  Scanner", SwingConstants.CENTER);
+        scanIcon.setFont(new Font("SansSerif", Font.BOLD, 18)); scanIcon.setForeground(UIUtils.ACCENT);
         scanIcon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel scanSub = new JLabel("Enter or select a QR code to simulate scanning", SwingConstants.CENTER);
+        JLabel scanSub = new JLabel("Select a point to scan", SwingConstants.CENTER);
         scanSub.setFont(UIUtils.fontSmall); scanSub.setForeground(UIUtils.TEXT2);
         scanSub.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        String[] qrOptions = Database.locations.stream().map(l -> l.qrCodeData + " — " + l.locationName).toArray(String[]::new);
+        String[] qrOptions = Database.locations.stream().map(l -> l.qrCodeData).toArray(String[]::new);
         JComboBox<String> qrSelect = new JComboBox<>(qrOptions);
         qrSelect.setFont(UIUtils.fontNormal);
         qrSelect.setAlignmentX(Component.CENTER_ALIGNMENT);
         qrSelect.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
 
-        JButton scanBtn = UIUtils.primaryBtn("Simulate Scan");
+        JButton scanBtn = UIUtils.primaryBtn("Process Scan");
         scanBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        scanBox.add(scanIcon); scanBox.add(Box.createVerticalStrut(8));
-        scanBox.add(scanSub); scanBox.add(Box.createVerticalStrut(12));
-        scanBox.add(qrSelect); scanBox.add(Box.createVerticalStrut(10));
+        scanBox.add(scanIcon); scanBox.add(Box.createVerticalStrut(10));
+        scanBox.add(scanSub); scanBox.add(Box.createVerticalStrut(15));
+        scanBox.add(qrSelect); scanBox.add(Box.createVerticalStrut(15));
         scanBox.add(scanBtn);
-        body.add(scanBox); body.add(Box.createVerticalStrut(20));
 
-        // Result panel
+        QRGraphic qrGraphic = new QRGraphic();
+        JPanel genBox = UIUtils.card();
+        genBox.setLayout(new BorderLayout());
+        genBox.add(new JLabel("Code Preview", SwingConstants.CENTER), BorderLayout.NORTH);
+        genBox.add(qrGraphic, BorderLayout.CENTER);
+        
+        qrContainer.add(scanBox);
+        qrContainer.add(genBox);
+        body.add(qrContainer); body.add(Box.createVerticalStrut(20));
+
         JPanel resultPanel = UIUtils.card();
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
         resultPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -56,6 +102,8 @@ public class QRPanel {
             int idx = qrSelect.getSelectedIndex();
             if (idx < 0 || idx >= Database.locations.size()) return;
             Location loc = Database.locations.get(idx);
+            qrGraphic.setData(loc.qrCodeData);
+            
             resultPanel.removeAll();
             resultPanel.setVisible(true);
 

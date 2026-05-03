@@ -28,27 +28,34 @@ public class HomePanel {
         stats.setBackground(UIUtils.BG);
         stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
-        long open = Database.requests.stream().filter(r -> "Submitted".equals(r.status)).count();
-        long inProg = Database.requests.stream().filter(r -> "In Progress".equals(r.status)).count();
-        long resolved = Database.requests.stream().filter(r -> "Resolved".equals(r.status)).count();
+        long open = Database.requests.stream().filter(r -> r.userId == Database.currentUser.userId && "Submitted".equals(r.status)).count();
+        long inProg = Database.requests.stream().filter(r -> r.userId == Database.currentUser.userId && "In Progress".equals(r.status)).count();
+        long resolved = Database.requests.stream().filter(r -> r.userId == Database.currentUser.userId && "Resolved".equals(r.status)).count();
 
         stats.add(statCard(String.valueOf(Database.locations.size()), "Locations", UIUtils.ACCENT));
-        stats.add(statCard(String.valueOf(open),             "Open Requests", UIUtils.DANGER));
-        stats.add(statCard(String.valueOf(inProg),           "In Progress", UIUtils.WARNING));
-        stats.add(statCard(String.valueOf(resolved),         "Resolved", UIUtils.SUCCESS));
+        stats.add(statCard(String.valueOf(open),             "My Open", UIUtils.DANGER));
+        stats.add(statCard(String.valueOf(inProg),           "My In Progress", UIUtils.WARNING));
+        stats.add(statCard(String.valueOf(resolved),         "My Resolved", UIUtils.SUCCESS));
 
-        body.add(UIUtils.sectionLabel("System Overview"));
+        body.add(UIUtils.sectionLabel("Your Activity Overview"));
         body.add(Box.createVerticalStrut(8));
         body.add(stats);
         body.add(Box.createVerticalStrut(20));
 
         // Recent requests table
-        body.add(UIUtils.sectionLabel("Recent Requests"));
+        body.add(UIUtils.sectionLabel("Your Recent Requests"));
         body.add(Box.createVerticalStrut(8));
         String[] cols = {"ID","Description","Location","Status","Date"};
-        Object[][] data = new Object[Database.requests.size()][5];
-        for (int i = 0; i < Database.requests.size(); i++) {
-            Request r = Database.requests.get(i);
+        
+        java.util.List<Request> myRequests = Database.requests.stream()
+            .filter(r -> r.userId == Database.currentUser.userId)
+            .sorted((r1, r2) -> r2.requestDate.compareTo(r1.requestDate))
+            .limit(10)
+            .collect(java.util.stream.Collectors.toList());
+
+        Object[][] data = new Object[myRequests.size()][5];
+        for (int i = 0; i < myRequests.size(); i++) {
+            Request r = myRequests.get(i);
             Location loc = Database.findLocation(r.locationId);
             data[i] = new Object[]{"REQ-"+String.format("%04d",r.requestId),
                 r.description.length()>50?r.description.substring(0,47)+"...":r.description,

@@ -35,6 +35,12 @@ public class RequestsPanel {
         List<Request> mine = new ArrayList<>();
         for (Request r : Database.requests) if (r.userId == Database.currentUser.userId) mine.add(r);
 
+        if (mine.isEmpty()) {
+            JLabel empty = new JLabel("You have no requests yet.", SwingConstants.CENTER);
+            empty.setFont(UIUtils.fontNormal); empty.setForeground(UIUtils.TEXT2);
+            p.add(empty, BorderLayout.NORTH);
+        }
+
         for (Request r : mine) {
             Location loc = Database.findLocation(r.locationId);
             Service  svc = Database.findService(r.serviceId);

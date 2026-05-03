@@ -6,18 +6,18 @@ import java.awt.event.*;
 
 public class UIUtils {
     // Colors
-    public static final Color NAVY       = new Color(13,  27,  62);
-    public static final Color NAVY_LIGHT = new Color(26,  47,  94);
-    public static final Color ACCENT     = new Color(37,  99, 235);
-    public static final Color ACCENT2    = new Color(59, 130, 246);
-    public static final Color SUCCESS    = new Color(16, 185, 129);
-    public static final Color WARNING    = new Color(245,158, 11);
-    public static final Color DANGER     = new Color(239, 68, 68);
-    public static final Color BG         = new Color(248,250,252);
+    public static final Color NAVY       = new Color(153, 27, 27);  // Deep Red
+    public static final Color NAVY_LIGHT = new Color(185, 28, 28);  // Brighter Red
+    public static final Color ACCENT     = new Color(220, 38, 38);  // Primary Red
+    public static final Color ACCENT2    = new Color(239, 68, 68);  // Lighter Red
+    public static final Color SUCCESS    = new Color(22, 163, 74);
+    public static final Color WARNING    = new Color(217, 119, 6);
+    public static final Color DANGER     = new Color(185, 28, 28);
+    public static final Color BG         = new Color(255, 255, 255); // White BG
     public static final Color CARD       = Color.WHITE;
-    public static final Color BORDER     = new Color(226,232,240);
-    public static final Color TEXT1      = new Color(15, 23, 42);
-    public static final Color TEXT2      = new Color(100,116,139);
+    public static final Color BORDER     = new Color(229, 231, 235);
+    public static final Color TEXT1      = new Color(17, 24, 39);
+    public static final Color TEXT2      = new Color(75, 85, 99);
 
     // Fonts
     public static Font fontTitle  = new Font("SansSerif", Font.BOLD,  22);
