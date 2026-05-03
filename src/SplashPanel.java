@@ -99,4 +99,3 @@ public class SplashPanel extends JPanel {
         }
     }
 }
-}
