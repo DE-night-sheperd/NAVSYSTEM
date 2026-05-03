@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 public class LoginPanel {
@@ -124,13 +125,13 @@ public class LoginPanel {
                 setFocusPainted(false);
                 setForeground(new Color(71, 85, 105));
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                setFont(new Font("Segoe UI", Font.MEDIUM, 13));
+                setFont(new Font("Segoe UI", Font.PLAIN, 13)); 
             }
         };
         signupBtn.addActionListener(e -> listener.onSignupClicked());
 
         JLabel errorMsg = new JLabel(" ", SwingConstants.CENTER);
-        errorMsg.setFont(new Font("Segoe UI", Font.MEDIUM, 12));
+        errorMsg.setFont(new Font("Segoe UI", Font.PLAIN, 12)); 
         errorMsg.setForeground(new Color(220, 38, 38));
         errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
