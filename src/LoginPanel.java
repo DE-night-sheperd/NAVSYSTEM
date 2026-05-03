@@ -212,5 +212,3 @@ public class LoginPanel {
         return group;
     }
 }
-}
-}
