@@ -23,21 +23,21 @@ public class Database {
         // SPU Locations - Central Campus
         locations.add(new Location(1, "Moroka Hall (C001)", "Central Campus", "Residence", -28.7490, 24.7645, "QR-C001"));
         locations.add(new Location(8, "Student Affairs (C002)", "Central Campus", "Admin", -28.7485, 24.7650, "QR-C002"));
-        locations.add(new Location(3, "Academic Building (C003)", "Central Campus", "Lecture Hall", -28.7458, 24.7668, "QR-C003"));
-        locations.add(new Location(2, "Library & Resources (C004)", "Central Campus", "Library", -28.7462, 24.7665, "QR-C004"));
-        locations.add(new Location(9, "Natural Sciences (C005)", "Central Campus", "Science", -28.7470, 24.7668, "QR-C005"));
-        locations.add(new Location(4, "Data Science & IT (C006)", "Central Campus", "IT Lab", -28.7463, 24.7670, "QR-C006"));
-        locations.add(new Location(10, "Humanities Labs (C010)", "Central Campus", "Arts", -28.7475, 24.7660, "QR-C010"));
-        locations.add(new Location(11, "Agricultural Sciences (C011)", "Central Campus", "Agriculture", -28.7480, 24.7670, "QR-C011"));
+        locations.add(new Location(3, "Academic Building (C003)", "Central Campus", "Lecture Hall", -28.749503029197044, 24.764863105051763, "QR-C003"));
+        locations.add(new Location(2, "Library & Resources (C004)", "Central Campus", "Library", -28.748999,  24.765028, "QR-C004"));
+        locations.add(new Location(9, "Natural Sciences (C005)", "Central Campus", "Science", -28.749681061286545, 24.765182736905615, "QR-C005"));
+        locations.add(new Location(4, "Data Science & IT (C006)", "Central Campus", "IT Lab", -28.749690964132864, 24.76451914303902, "QR-C006"));
+        locations.add(new Location(10, "Humanities Labs (C010)", "Central Campus", "Arts", -28.750299987377037, 24.764327124388263, "QR-C010"));
+        locations.add(new Location(11, "Agricultural Sciences (C011)", "Central Campus", "Agriculture", -28.75032722004077, 24.764965304021665, "QR-C011"));
 
         // South Campus
-        locations.add(new Location(5, "Windhoek Draught Park", "South Campus", "Sports", -28.7515, 24.7685, "QR-WDP"));
-        locations.add(new Location(12, "Massouw Hall (S007)", "South Campus", "Residence", -28.7505, 24.7675, "QR-S007"));
-        locations.add(new Location(6, "Umnandi Hall (S005)", "South Campus", "Residence", -28.7500, 24.7690, "QR-S005"));
-        locations.add(new Location(13, "Tauana Hall (R002)", "South Campus", "Residence", -28.7520, 24.7680, "QR-R002"));
+        locations.add(new Location(5, "Windhoek Draught Park", "South Campus", "Sports", -28.755022363526145, 24.75802464368211, "QR-WDP"));
+        locations.add(new Location(12, "Massouw Hall (S007)", "South Campus", "Residence", -28.753528, 24.760333, "QR-S007"));
+        locations.add(new Location(6, "Umnandi Hall (S005)", "South Campus", "Residence", -28.754926624260552, 24.75983867680364, "QR-S005"));
+        locations.add(new Location(13, "Tauana Hall (R002)", "South Campus", "Residence", -28.75559720350166, 24.760054269382643, "QR-R002"));
 
         // North Campus
-        locations.add(new Location(7, "North Campus Admin", "North Campus", "Admin Office", -28.7405, 24.7655, "QR-NCADMIN"));
+        locations.add(new Location(7, "North Campus Admin", "North Campus", "Admin Office", -28.745111, 24.766583, "QR-NCADMIN"));
 
         // Services
         services.add(new Service(1, "IT Support", "Hardware/software issues", "IT Dept", 2, "ext 101"));
