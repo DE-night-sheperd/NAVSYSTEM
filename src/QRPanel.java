@@ -116,11 +116,11 @@ public class QRPanel {
         scanBox.add(qrSelect); scanBox.add(Box.createVerticalStrut(15));
         scanBox.add(scanBtn);
 
-        QRGraphic qrGraphic = new QRGraphic();
+        JLabel qrImageLabel = new JLabel("", SwingConstants.CENTER);
         JPanel genBox = UIUtils.card();
         genBox.setLayout(new BorderLayout());
         genBox.add(new JLabel("Code Preview", SwingConstants.CENTER), BorderLayout.NORTH);
-        genBox.add(qrGraphic, BorderLayout.CENTER);
+        genBox.add(qrImageLabel, BorderLayout.CENTER);
         
         qrContainer.add(scanBox);
         qrContainer.add(genBox);
@@ -136,7 +136,9 @@ public class QRPanel {
             int idx = qrSelect.getSelectedIndex();
             if (idx < 0 || idx >= Database.locations.size()) return;
             Location loc = Database.locations.get(idx);
-            qrGraphic.setData(loc.qrCodeData);
+            ImageIcon qrIcon = new ImageIcon("src/resources/qrcodes/" + loc.qrCodeData + ".png");
+            Image scaled = qrIcon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            qrImageLabel.setIcon(new ImageIcon(scaled));
             
             resultPanel.removeAll();
             resultPanel.setVisible(true);
