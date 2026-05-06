@@ -62,8 +62,8 @@ public class MainDashboard extends JPanel {
         JButton logout = new JButton("\uD83D\uDEAA");
         logout.setToolTipText("Sign Out");
         logout.setFont(new Font("SansSerif", Font.PLAIN, 20));
-        logout.setForeground(new Color(255, 255, 255, 180));
-        logout.setBackground(UIUtils.NAVY);
+        logout.setForeground(Color.WHITE);
+        logout.setBackground(Color.BLACK);
         logout.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         logout.setFocusPainted(false);
         logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -117,8 +117,8 @@ public class MainDashboard extends JPanel {
 
         JButton btn = new JButton(label);
         btn.setFont(new Font("SansSerif", Font.PLAIN, 24)); // Icon size
-        btn.setForeground(new Color(255, 255, 255, 200)); // High visibility white
-        btn.setBackground(UIUtils.NAVY);
+        btn.setForeground(new Color(255, 255, 255, 220)); // Bright white icons
+        btn.setBackground(Color.BLACK);
         btn.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
         btn.setHorizontalAlignment(SwingConstants.CENTER);
         btn.setFocusPainted(false);
@@ -141,10 +141,10 @@ public class MainDashboard extends JPanel {
         navButtons.forEach((k, b) -> {
             if (k.equals(key)) {
                 b.setForeground(Color.WHITE);
-                b.setBackground(UIUtils.NAVY_LIGHT);
+                b.setBackground(UIUtils.NAVY_LIGHT); // Dark gray selection
             } else {
-                b.setForeground(new Color(255, 255, 255, 200));
-                b.setBackground(UIUtils.NAVY);
+                b.setForeground(new Color(255, 255, 255, 220));
+                b.setBackground(Color.BLACK);
             }
         });
     }
