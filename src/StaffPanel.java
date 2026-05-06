@@ -4,6 +4,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Panel for Staff members to manage and process incoming service requests.
+ * Provides filtering by status and a dialog to update request progress.
+ */
 public class StaffPanel {
     public static JPanel build(JFrame mainFrame) {
         JPanel root = new JPanel(new BorderLayout());
@@ -14,7 +18,7 @@ public class StaffPanel {
         body.setBackground(UIUtils.BG);
         body.setBorder(BorderFactory.createEmptyBorder(16,20,16,20));
 
-        // Filters
+        // Filters: Allow staff to narrow down requests by their current status
         JPanel filterRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         filterRow.setBackground(UIUtils.BG);
         String[] stats = {"All Statuses","Submitted","In Progress","Resolved","Closed"};
@@ -23,20 +27,20 @@ public class StaffPanel {
         filterRow.add(new JLabel("Status Filter:")); filterRow.add(statFilter);
         body.add(filterRow, BorderLayout.NORTH);
 
-        // Table
+        // Table Setup
         String[] cols = {"ID","User","Service","Location","Status","Date"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r,int c){return false;}
         };
-        refreshStaffTable(model, "All Statuses");
+        refreshStaffTable(model, "All Statuses"); // Initial load
         JTable table = UIUtils.styledTable(model);
         UIUtils.styleStatusColumn(table, 4);
         JScrollPane sp = new JScrollPane(table);
         sp.setBorder(BorderFactory.createLineBorder(UIUtils.BORDER));
         body.add(sp, BorderLayout.CENTER);
 
-        // Action panel
+        // Action panel: Shows details of selected request and the update button
         JPanel actionPanel = UIUtils.card();
         actionPanel.setLayout(new BorderLayout(15, 0));
         actionPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -59,12 +63,12 @@ public class StaffPanel {
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 5));
         right.setBackground(UIUtils.CARD);
         JButton updBtn = UIUtils.primaryBtn("Add Update / Change Status");
-        updBtn.setEnabled(false);
+        updBtn.setEnabled(false); // Disabled until a request is selected
         right.add(updBtn);
         actionPanel.add(right, BorderLayout.EAST);
         body.add(actionPanel, BorderLayout.SOUTH);
 
-        final List<Request> currentList = new ArrayList<>();
+        // Listener for status filter changes
         statFilter.addActionListener(e -> {
             refreshStaffTable(model, (String)statFilter.getSelectedItem());
             updBtn.setEnabled(false);
@@ -72,10 +76,10 @@ public class StaffPanel {
             detLbl.setText(" ");
         });
 
+        // Listener for table selection to enable/disable processing
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && table.getSelectedRow() >= 0) {
                 int row = table.getSelectedRow();
-                // We need the actual request object. Let's find it by ID
                 String reqIdStr = (String) model.getValueAt(row, 0);
                 int id = Integer.parseInt(reqIdStr.replace("REQ-", ""));
                 Request req = Database.findRequest(id);
@@ -87,6 +91,7 @@ public class StaffPanel {
             }
         });
 
+        // Open the update dialog for the selected request
         updBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             int id = Integer.parseInt(((String) model.getValueAt(row, 0)).replace("REQ-", ""));
@@ -97,6 +102,9 @@ public class StaffPanel {
         return root;
     }
 
+    /**
+     * Refreshes the staff table based on the selected status filter.
+     */
     private static void refreshStaffTable(DefaultTableModel m, String filter) {
         m.setRowCount(0);
         for (Request r : Database.requests) {
@@ -115,6 +123,9 @@ public class StaffPanel {
         }
     }
 
+    /**
+     * Shows a modal dialog for staff to change status and add progress comments.
+     */
     private static void showUpdateDialog(JFrame mainFrame, Request req, DefaultTableModel model, String filter) {
         JDialog d = new JDialog(mainFrame, "Update Request", true);
         d.setSize(420, 320);
@@ -147,12 +158,20 @@ public class StaffPanel {
             String newStat = (String) statBox.getSelectedItem();
             String comment = comm.getText().trim();
             if (comment.isEmpty()) { JOptionPane.showMessageDialog(d,"Please add a comment."); return; }
+            
+            // Update request status and add a new update record
             req.status = newStat;
             Database.requestUpdates.add(new RequestUpdate(Database.nextUpdId++, req.requestId, Database.currentUser.userId, comment, UIUtils.today()));
-            refreshStaffTable(model, filter);
+            
+            // Persist changes to files
+            Database.saveRequests();
+            Database.saveUpdates();
+            
+            refreshStaffTable(model, filter); // Refresh view
             d.dispose();
         });
 
+        // Dialog assembly
         p.add(t); p.add(Box.createVerticalStrut(15));
         p.add(new JLabel("Change Status:")); p.add(Box.createVerticalStrut(4));
         p.add(statBox); p.add(Box.createVerticalStrut(12));

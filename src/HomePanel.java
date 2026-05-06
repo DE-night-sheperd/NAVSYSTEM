@@ -3,6 +3,10 @@ import java.awt.*;
 
 public class HomePanel {
     public static JPanel build() {
+        return build(null);
+    }
+
+    public static JPanel build(java.util.function.Consumer<String> pageLoader) {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIUtils.BG);
 
@@ -10,12 +14,23 @@ public class HomePanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(UIUtils.NAVY);
         header.setBorder(BorderFactory.createEmptyBorder(24,28,24,28));
+        
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(UIUtils.NAVY);
         JLabel hl = new JLabel("Welcome, " + Database.currentUser.name);
         hl.setFont(UIUtils.fontTitle); hl.setForeground(Color.WHITE);
         JLabel hs = new JLabel("Role: " + Database.currentUser.role.toUpperCase() + "  |  " + UIUtils.today());
         hs.setFont(UIUtils.fontSmall); hs.setForeground(new Color(148,163,184));
-        header.add(hl, BorderLayout.NORTH);
-        header.add(hs, BorderLayout.SOUTH);
+        titlePanel.add(hl, BorderLayout.NORTH);
+        titlePanel.add(hs, BorderLayout.SOUTH);
+        header.add(titlePanel, BorderLayout.WEST);
+
+        if ("student".equals(Database.currentUser.role) && pageLoader != null) {
+            JButton logBtn = UIUtils.primaryBtn("\u2795 Log New Request");
+            logBtn.addActionListener(e -> pageLoader.accept("log_request"));
+            header.add(logBtn, BorderLayout.EAST);
+        }
+
         root.add(header, BorderLayout.NORTH);
 
         JPanel body = new JPanel();

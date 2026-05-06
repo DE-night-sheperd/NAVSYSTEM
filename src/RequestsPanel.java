@@ -4,8 +4,20 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Panel for students to view their existing service requests and submit new ones.
+ * Uses a JTabbedPane to separate "My Requests" and "New Request" functionality.
+ */
 public class RequestsPanel {
     public static JPanel build() {
+        return build(0); // Default to first tab (My Requests)
+    }
+
+    /**
+     * Builds the panel with an option to select the starting tab.
+     * @param initialTab 0 for "My Requests", 1 for "New Request"
+     */
+    public static JPanel build(int initialTab) {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(UIUtils.BG);
         root.add(UIUtils.pageHeader("Service Requests", "Submit and track your campus requests"), BorderLayout.NORTH);
@@ -17,10 +29,18 @@ public class RequestsPanel {
         tabs.addTab("My Requests",  buildMyRequestsTab());
         tabs.addTab("New Request",  buildNewRequestTab(tabs));
 
+        // Set the active tab based on navigation source
+        if (initialTab >= 0 && initialTab < tabs.getTabCount()) {
+            tabs.setSelectedIndex(initialTab);
+        }
+
         root.add(tabs, BorderLayout.CENTER);
         return root;
     }
 
+    /**
+     * Creates the "My Requests" tab which shows a table of the user's history and an update timeline.
+     */
     private static JPanel buildMyRequestsTab() {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(UIUtils.BG);
@@ -32,6 +52,7 @@ public class RequestsPanel {
             public boolean isCellEditable(int r,int c){return false;}
         };
 
+        // Filter requests to only show those belonging to the current user
         List<Request> mine = new ArrayList<>();
         for (Request r : Database.requests) if (r.userId == Database.currentUser.userId) mine.add(r);
 
@@ -41,6 +62,7 @@ public class RequestsPanel {
             p.add(empty, BorderLayout.NORTH);
         }
 
+        // Populate table model
         for (Request r : mine) {
             Location loc = Database.findLocation(r.locationId);
             Service  svc = Database.findService(r.serviceId);
@@ -59,7 +81,7 @@ public class RequestsPanel {
         sp.setBorder(BorderFactory.createLineBorder(UIUtils.BORDER));
         p.add(sp, BorderLayout.CENTER);
 
-        // Updates panel below
+        // Updates panel: shows detailed timeline when a request is selected
         JPanel updPanel = UIUtils.card();
         updPanel.setLayout(new BoxLayout(updPanel, BoxLayout.Y_AXIS));
         updPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -73,6 +95,7 @@ public class RequestsPanel {
         updTitle.setFont(UIUtils.fontBold); updTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         updPanel.add(updTitle);
 
+        // Selection listener to update the timeline view
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && table.getSelectedRow() >= 0) {
                 int row = table.getSelectedRow();
@@ -83,7 +106,7 @@ public class RequestsPanel {
                 lbl.setFont(UIUtils.fontBold); lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
                 updPanel.add(lbl); updPanel.add(Box.createVerticalStrut(8));
 
-                // Status timeline
+                // Status timeline visualization
                 String[] steps = {"Submitted","In Progress","Resolved","Closed"};
                 int curr = 0;
                 for (int i = 0; i < steps.length; i++) if (steps[i].equals(req.status)) curr = i;
@@ -108,6 +131,7 @@ public class RequestsPanel {
                 }
                 updPanel.add(timeline); updPanel.add(Box.createVerticalStrut(10));
 
+                // Display individual comments/updates from staff
                 boolean hasUpd = false;
                 for (RequestUpdate u : Database.requestUpdates) {
                     if (u.requestId == req.requestId) {
@@ -143,6 +167,9 @@ public class RequestsPanel {
         return p;
     }
 
+    /**
+     * Creates the "New Request" tab with a form to submit issues.
+     */
     private static JPanel buildNewRequestTab(JTabbedPane tabs) {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -157,6 +184,7 @@ public class RequestsPanel {
         JLabel title = new JLabel("Submit a New Request");
         title.setFont(UIUtils.fontBold); title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        // Dropdowns populated from Database
         JComboBox<String> svcBox = new JComboBox<>(Database.services.stream().map(s->s.serviceName+" — "+s.department).toArray(String[]::new));
         svcBox.setFont(UIUtils.fontNormal); svcBox.setAlignmentX(Component.LEFT_ALIGNMENT);
         svcBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
@@ -181,19 +209,27 @@ public class RequestsPanel {
         submit.setAlignmentX(Component.LEFT_ALIGNMENT);
         submit.setMaximumSize(new Dimension(200, 38));
         submit.addActionListener(e -> {
+            // Validation and Submission logic
             if (desc.getText().trim().isEmpty()) { msg.setForeground(UIUtils.DANGER); msg.setText("Please enter a description."); return; }
             int svcIdx = svcBox.getSelectedIndex();
             int locIdx = locBox.getSelectedIndex();
+            
+            // Create new request object
             Request r = new Request(Database.nextReqId++, Database.currentUser.userId,
                 Database.services.get(svcIdx).serviceId,
                 Database.locations.get(locIdx).locationId,
                 desc.getText().trim(), "Submitted", UIUtils.today());
+            
+            // Persist to database and file
             Database.requests.add(r);
+            Database.saveRequests();
+            
             msg.setForeground(UIUtils.SUCCESS);
             msg.setText("Request submitted successfully! REQ-"+String.format("%04d",r.requestId));
             desc.setText("");
         });
 
+        // Form assembly
         form.add(title); form.add(Box.createVerticalStrut(16));
         String[] lbs = {"Service Type","Location","Description of Issue"};
         JComponent[] flds = {svcBox, locBox, descScroll};
