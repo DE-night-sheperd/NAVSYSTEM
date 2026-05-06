@@ -6,8 +6,8 @@ import java.awt.event.*;
 
 public class UIUtils {
     // Colors
-    public static final Color NAVY       = Color.BLACK;             // Black Sidebar
-    public static final Color NAVY_LIGHT = new Color(31, 41, 55);   // Dark Gray for selection
+    public static final Color NAVY       = new Color(153, 27, 27);  // Deep Red
+    public static final Color NAVY_LIGHT = new Color(185, 28, 28);  // Brighter Red
     public static final Color ACCENT     = new Color(220, 38, 38);  // Primary Red
     public static final Color ACCENT2    = new Color(239, 68, 68);  // Lighter Red
     public static final Color SUCCESS    = new Color(22, 163, 74);

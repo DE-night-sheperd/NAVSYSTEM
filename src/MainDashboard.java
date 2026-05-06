@@ -20,7 +20,7 @@ public class MainDashboard extends JPanel {
         // Sidebar: The vertical navigation rail on the left
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(UIUtils.NAVY);
+        sidebar.setBackground(Color.BLACK); // Sidebar is black
         sidebar.setPreferredSize(new Dimension(80, 0)); // Narrow rail design
         sidebar.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
@@ -64,6 +64,9 @@ public class MainDashboard extends JPanel {
         logout.setFont(new Font("SansSerif", Font.PLAIN, 20));
         logout.setForeground(Color.WHITE);
         logout.setBackground(Color.BLACK);
+        logout.setContentAreaFilled(true);
+        logout.setBorderPainted(false);
+        logout.setOpaque(true);
         logout.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         logout.setFocusPainted(false);
         logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -117,8 +120,11 @@ public class MainDashboard extends JPanel {
 
         JButton btn = new JButton(label);
         btn.setFont(new Font("SansSerif", Font.PLAIN, 24)); // Icon size
-        btn.setForeground(new Color(255, 255, 255, 220)); // Bright white icons
-        btn.setBackground(Color.BLACK);
+        btn.setForeground(Color.WHITE); // Bright white icons
+        btn.setBackground(Color.BLACK); // Button background is black
+        btn.setContentAreaFilled(true);
+        btn.setBorderPainted(false);
+        btn.setOpaque(true);
         btn.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
         btn.setHorizontalAlignment(SwingConstants.CENTER);
         btn.setFocusPainted(false);
@@ -141,9 +147,9 @@ public class MainDashboard extends JPanel {
         navButtons.forEach((k, b) -> {
             if (k.equals(key)) {
                 b.setForeground(Color.WHITE);
-                b.setBackground(UIUtils.NAVY_LIGHT); // Dark gray selection
+                b.setBackground(new Color(40, 40, 40)); // Dark highlight for selection
             } else {
-                b.setForeground(new Color(255, 255, 255, 220));
+                b.setForeground(Color.WHITE);
                 b.setBackground(Color.BLACK);
             }
         });
