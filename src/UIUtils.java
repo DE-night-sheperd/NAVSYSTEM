@@ -269,4 +269,18 @@ public class UIUtils {
         java.time.LocalDate d = java.time.LocalDate.now();
         return d.toString();
     }
+
+    public static String getEstimatedResponse(Request req) {
+        if ("Resolved".equals(req.status) || "Closed".equals(req.status)) {
+            return "Completed";
+        }
+        
+        // If staff have seen it, estimate 24 hours
+        if (req.firstSeenDate != null) {
+            return "~24 hours";
+        }
+        
+        // Default estimate: 48 hours if not yet seen
+        return "~48 hours";
+    }
 }

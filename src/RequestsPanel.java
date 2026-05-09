@@ -46,7 +46,7 @@ public class RequestsPanel {
         p.setBackground(UIUtils.BG);
         p.setBorder(BorderFactory.createEmptyBorder(16,20,16,20));
 
-        String[] cols = {"Req #","Description","Location","Service","Status","Date"};
+        String[] cols = {"Req #","Description","Location","Service","Status","Date","Est. Response"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r,int c){return false;}
@@ -71,7 +71,8 @@ public class RequestsPanel {
                 r.description.length()>45?r.description.substring(0,42)+"...":r.description,
                 loc!=null?loc.locationName:"N/A",
                 svc!=null?svc.serviceName:"N/A",
-                r.status, r.requestDate
+                r.status, r.requestDate,
+                UIUtils.getEstimatedResponse(r)
             });
         }
 

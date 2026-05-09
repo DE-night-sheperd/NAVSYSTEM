@@ -142,6 +142,32 @@ public class MainDashboard extends JPanel {
      * Switches the visible page in the content panel and updates sidebar button styles.
      */
     private void showPage(String key) {
+        // Remove old panels and rebuild to ensure fresh data
+        try {
+            java.awt.Component[] comps = contentPanel.getComponents();
+            for (java.awt.Component c : comps) {
+                contentPanel.remove(c);
+            }
+        } catch (Exception e) {}
+
+        // Rebuild all panels fresh
+        addNavItemToContent("home", HomePanel.build(this::showPage));
+        addNavItemToContent("profile", ProfilePanel.build());
+        addNavItemToContent("map", NavigationPanel.build());
+        addNavItemToContent("qr", QRPanel.build());
+        addNavItemToContent("ai", AIPanel.build());
+
+        if ("student".equals(Database.currentUser.role)) {
+            addNavItemToContent("requests", RequestsPanel.build());
+            addNavItemToContent("log_request", RequestsPanel.build(1));
+        } else if ("staff".equals(Database.currentUser.role)) {
+            addNavItemToContent("staff_tasks", StaffPanel.build(mainFrame));
+        } else if ("manager".equals(Database.currentUser.role)) {
+            addNavItemToContent("locations", LocationsPanel.build(mainFrame));
+            addNavItemToContent("services", ServicesPanel.build(mainFrame));
+            addNavItemToContent("staff_tasks", StaffPanel.build(mainFrame));
+        }
+
         cardLayout.show(contentPanel, key);
         // Highlight the active button and reset others
         navButtons.forEach((k, b) -> {
@@ -153,5 +179,9 @@ public class MainDashboard extends JPanel {
                 b.setBackground(Color.BLACK);
             }
         });
+    }
+    
+    private void addNavItemToContent(String key, JPanel panel) {
+        contentPanel.add(panel, key);
     }
 }

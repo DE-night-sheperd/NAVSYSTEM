@@ -84,6 +84,11 @@ public class StaffPanel {
                 int id = Integer.parseInt(reqIdStr.replace("REQ-", ""));
                 Request req = Database.findRequest(id);
                 if (req != null) {
+                    // Mark as seen if not already
+                    if (req.firstSeenDate == null) {
+                        req.firstSeenDate = UIUtils.today();
+                        Database.saveRequests();
+                    }
                     selLbl.setText("Processing: REQ-" + String.format("%04d", req.requestId));
                     detLbl.setText("Description: " + (req.description.length()>60?req.description.substring(0,57)+"...":req.description));
                     updBtn.setEnabled(true);

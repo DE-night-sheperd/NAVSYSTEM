@@ -92,6 +92,21 @@ public class LoginPanel {
         JPasswordField passField = (JPasswordField) passGroup.getClientProperty("field");
         passField.setEchoChar('\u2022');
 
+        // Forgot Password Link
+        JButton forgotBtn = new JButton("Forgot Password?") {
+            {
+                setContentAreaFilled(false);
+                setBorderPainted(false);
+                setFocusPainted(false);
+                setForeground(new Color(59, 130, 246));
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                setFont(new Font("Segoe UI", Font.BOLD, 12));
+                setAlignmentX(Component.LEFT_ALIGNMENT);
+                setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+            }
+        };
+        forgotBtn.addActionListener(e -> handleForgotPassword(mainFrame));
+
         // Login Button
         JButton loginBtn = new JButton("SIGN IN") {
             @Override
@@ -158,7 +173,9 @@ public class LoginPanel {
         content.add(emailGroup);
         content.add(Box.createVerticalStrut(20));
         content.add(passGroup);
-        content.add(Box.createVerticalStrut(35));
+        content.add(Box.createVerticalStrut(5));
+        content.add(forgotBtn);
+        content.add(Box.createVerticalStrut(25));
         
         loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         content.add(loginBtn);
@@ -172,6 +189,39 @@ public class LoginPanel {
         card.add(content);
         root.add(card);
         return root;
+    }
+
+    private static void handleForgotPassword(JFrame frame) {
+        String email = JOptionPane.showInputDialog(frame, "Enter your registered email address:", "Forgot Password", JOptionPane.QUESTION_MESSAGE);
+        if (email == null || email.trim().isEmpty()) return;
+
+        User user = null;
+        for (User u : Database.users) {
+            if (u.email.equalsIgnoreCase(email.trim())) {
+                user = u;
+                break;
+            }
+        }
+
+        if (user == null) {
+            JOptionPane.showMessageDialog(frame, "No account found with that email address.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Generate a random 6-digit code
+        String code = String.format("%06d", new java.util.Random().nextInt(1000000));
+        
+        // Display the code
+        JOptionPane.showMessageDialog(frame, "Verification Code: " + code + "\n\nPlease remember this code to reveal your password.", "Security Verification", JOptionPane.INFORMATION_MESSAGE);
+
+        // Ask for the code
+        String input = JOptionPane.showInputDialog(frame, "Enter the verification code displayed on the screen:", "Verify Code", JOptionPane.QUESTION_MESSAGE);
+        
+        if (code.equals(input)) {
+            JOptionPane.showMessageDialog(frame, "Verification Successful!\n\nYour Password is: " + user.passwordHash, "Password Revealed", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(frame, "Incorrect code. Verification failed.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private static JPanel createInputGroup(String labelText, String placeholder) {

@@ -17,7 +17,14 @@ public class HomePanel {
         
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setBackground(UIUtils.NAVY);
-        JLabel hl = new JLabel("Welcome, " + Database.currentUser.name);
+        
+        String greeting = "Welcome";
+        int hour = java.time.LocalTime.now().getHour();
+        if (hour < 12) greeting = "Good Morning";
+        else if (hour < 17) greeting = "Good Afternoon";
+        else greeting = "Good Evening";
+
+        JLabel hl = new JLabel(greeting + ", " + Database.currentUser.name);
         hl.setFont(UIUtils.fontTitle); hl.setForeground(Color.WHITE);
         JLabel hs = new JLabel("Role: " + Database.currentUser.role.toUpperCase() + "  |  " + UIUtils.today());
         hs.setFont(UIUtils.fontSmall); hs.setForeground(new Color(148,163,184));
@@ -55,12 +62,68 @@ public class HomePanel {
         body.add(UIUtils.sectionLabel("Your Activity Overview"));
         body.add(Box.createVerticalStrut(8));
         body.add(stats);
-        body.add(Box.createVerticalStrut(20));
+        body.add(Box.createVerticalStrut(25));
+
+        // Quick Actions & Announcements
+        JPanel midRow = new JPanel(new GridLayout(1, 2, 20, 0));
+        midRow.setBackground(UIUtils.BG);
+        midRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
+
+        // Quick Actions
+        JPanel actions = UIUtils.card();
+        actions.setLayout(new BoxLayout(actions, BoxLayout.Y_AXIS));
+        JLabel actTitle = new JLabel("Quick Actions");
+        actTitle.setFont(UIUtils.fontBold);
+        actions.add(actTitle); actions.add(Box.createVerticalStrut(10));
+        
+        String[][] actionItems = {
+            {"\uD83D\uDCCD Find Nearest Lab", "map"},
+            {"\uD83D\uDCDD New Support Ticket", "log_request"},
+            {"\uD83D\uDC64 Update Profile", "profile"}
+        };
+
+        for (String[] item : actionItems) {
+            JButton b = new JButton(item[0]);
+            b.setFont(UIUtils.fontNormal);
+            b.setForeground(UIUtils.ACCENT);
+            b.setContentAreaFilled(false);
+            b.setBorderPainted(false);
+            b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            b.setHorizontalAlignment(SwingConstants.LEFT);
+            b.setAlignmentX(Component.LEFT_ALIGNMENT);
+            if (pageLoader != null) b.addActionListener(e -> pageLoader.accept(item[1]));
+            actions.add(b);
+        }
+        midRow.add(actions);
+
+        // Announcements
+        JPanel announc = UIUtils.card();
+        announc.setLayout(new BoxLayout(announc, BoxLayout.Y_AXIS));
+        JLabel annTitle = new JLabel("Campus Announcements");
+        annTitle.setFont(UIUtils.fontBold);
+        announc.add(annTitle); announc.add(Box.createVerticalStrut(10));
+        
+        String[] news = {
+            "\u2022 System maintenance on Sunday 2AM",
+            "\u2022 New IT Lab opened in Building C006",
+            "\u2022 Library hours extended for exams"
+        };
+        for (String n : news) {
+            JLabel nl = new JLabel(n);
+            nl.setFont(UIUtils.fontSmall);
+            nl.setForeground(UIUtils.TEXT2);
+            nl.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 0));
+            announc.add(nl);
+        }
+        midRow.add(announc);
+
+        body.add(midRow);
+        body.add(Box.createVerticalStrut(25));
 
         // Recent requests table
         body.add(UIUtils.sectionLabel("Your Recent Requests"));
         body.add(Box.createVerticalStrut(8));
-        String[] cols = {"ID","Description","Location","Status","Date"};
+        String[] cols = {"ID","Description","Location","Status","Date","Est. Response"};
         
         java.util.List<Request> myRequests = Database.requests.stream()
             .filter(r -> r.userId == Database.currentUser.userId)
@@ -68,13 +131,14 @@ public class HomePanel {
             .limit(10)
             .collect(java.util.stream.Collectors.toList());
 
-        Object[][] data = new Object[myRequests.size()][5];
+        Object[][] data = new Object[myRequests.size()][6];
         for (int i = 0; i < myRequests.size(); i++) {
             Request r = myRequests.get(i);
             Location loc = Database.findLocation(r.locationId);
             data[i] = new Object[]{"REQ-"+String.format("%04d",r.requestId),
                 r.description.length()>50?r.description.substring(0,47)+"...":r.description,
-                loc != null ? loc.locationName : "N/A", r.status, r.requestDate};
+                loc != null ? loc.locationName : "N/A", r.status, r.requestDate,
+                UIUtils.getEstimatedResponse(r)};
         }
         JTable table = UIUtils.styledTable(data, cols);
         UIUtils.styleStatusColumn(table, 3);

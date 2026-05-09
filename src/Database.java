@@ -195,7 +195,8 @@ public class Database {
                 String[] p = line.split("\\|");
                 if (p.length >= 7) {
                     int id = Integer.parseInt(p[0].trim());
-                    requests.add(new Request(id, Integer.parseInt(p[1].trim()), Integer.parseInt(p[2].trim()), Integer.parseInt(p[3].trim()), p[4].trim(), p[5].trim(), p[6].trim()));
+                    String firstSeen = (p.length > 7) ? p[7].trim() : null;
+                    requests.add(new Request(id, Integer.parseInt(p[1].trim()), Integer.parseInt(p[2].trim()), Integer.parseInt(p[3].trim()), p[4].trim(), p[5].trim(), p[6].trim(), firstSeen));
                     if (id > maxId) maxId = id;
                 }
             }
@@ -206,7 +207,7 @@ public class Database {
     public static void saveRequests() {
         try (PrintWriter pw = new PrintWriter(new FileWriter("requests.txt"))) {
             for (Request r : requests) {
-                pw.println(r.requestId + "|" + r.userId + "|" + r.serviceId + "|" + r.locationId + "|" + r.description + "|" + r.status + "|" + r.requestDate);
+                pw.println(r.requestId + "|" + r.userId + "|" + r.serviceId + "|" + r.locationId + "|" + r.description + "|" + r.status + "|" + r.requestDate + (r.firstSeenDate != null ? "|" + r.firstSeenDate : ""));
             }
         } catch (Exception e) { e.printStackTrace(); }
     }
