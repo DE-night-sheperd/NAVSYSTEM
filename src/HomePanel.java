@@ -44,11 +44,30 @@ public class HomePanel {
         }
 
         root.add(header, BorderLayout.NORTH);
+        
+        // Center Panel: Search + Body
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(UIUtils.BG());
+        
+        // Search Bar
+        JPanel searchPanel = new JPanel(new BorderLayout());
+        searchPanel.setBackground(UIUtils.BG());
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(15, 24, 0, 24));
+        
+        JTextField searchField = UIUtils.styledField("🔍 Search locations, services...");
+        searchField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        searchPanel.add(searchField, BorderLayout.CENTER);
+        
+        centerPanel.add(searchPanel, BorderLayout.NORTH);
 
         JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(UIUtils.BG());
-        body.setBorder(BorderFactory.createEmptyBorder(20,24,20,24));
+        body.setBorder(BorderFactory.createEmptyBorder(10,24,20,24));
+        
+        centerPanel.add(body, BorderLayout.CENTER);
+        root.add(centerPanel, BorderLayout.CENTER);
 
         // Stats row
         JPanel stats = new JPanel(new GridLayout(1, 4, 14, 0));

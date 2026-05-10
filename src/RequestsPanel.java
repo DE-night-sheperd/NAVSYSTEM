@@ -211,7 +211,12 @@ public class RequestsPanel {
         submit.setMaximumSize(new Dimension(200, 38));
         submit.addActionListener(e -> {
             // Validation and Submission logic
-            if (desc.getText().trim().isEmpty()) { msg.setForeground(UIUtils.DANGER); msg.setText("Please enter a description."); return; }
+            if (desc.getText().trim().isEmpty()) { 
+                msg.setForeground(UIUtils.DANGER); 
+                msg.setText("Please enter a description."); 
+                ToastManager.showError("Please enter a description for your request!");
+                return; 
+            }
             int svcIdx = svcBox.getSelectedIndex();
             int locIdx = locBox.getSelectedIndex();
             
@@ -227,6 +232,7 @@ public class RequestsPanel {
             
             msg.setForeground(UIUtils.SUCCESS);
             msg.setText("Request submitted successfully! REQ-"+String.format("%04d",r.requestId));
+            ToastManager.showSuccess("Request submitted successfully! REQ-" + String.format("%04d", r.requestId));
             desc.setText("");
         });
 

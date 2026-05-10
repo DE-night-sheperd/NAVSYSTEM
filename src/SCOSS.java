@@ -22,6 +22,8 @@ public class SCOSS {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(1100, 750);
             frame.setLocationRelativeTo(null);
+            
+            ToastManager.setMainFrame(frame);
 
             // Start with Splash Screen
             showSplash(frame);
