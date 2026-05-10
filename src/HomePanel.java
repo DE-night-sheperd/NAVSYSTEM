@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class HomePanel {
     public static JPanel build() {
@@ -24,16 +26,19 @@ public class HomePanel {
         else if (hour < 17) greeting = "Good Afternoon";
         else greeting = "Good Evening";
 
-        JLabel hl = new JLabel(greeting + ", " + Database.currentUser.name);
+        JLabel hl = new JLabel("");
         hl.setFont(UIUtils.fontTitle); hl.setForeground(Color.WHITE);
-        JLabel hs = new JLabel("Role: " + Database.currentUser.role.toUpperCase() + "  |  " + UIUtils.today());
+        
+        JLabel hs = new JLabel("");
         hs.setFont(UIUtils.fontSmall); hs.setForeground(new Color(148,163,184));
+        
         titlePanel.add(hl, BorderLayout.NORTH);
         titlePanel.add(hs, BorderLayout.SOUTH);
         header.add(titlePanel, BorderLayout.WEST);
 
+        JButton logBtn = null;
         if ("student".equals(Database.currentUser.role) && pageLoader != null) {
-            JButton logBtn = UIUtils.primaryBtn("\u2795 Log New Request");
+            logBtn = UIUtils.primaryBtn("\u2795 Log New Request");
             logBtn.addActionListener(e -> pageLoader.accept("log_request"));
             header.add(logBtn, BorderLayout.EAST);
         }
@@ -54,12 +59,14 @@ public class HomePanel {
         long inProg = Database.requests.stream().filter(r -> r.userId == Database.currentUser.userId && "In Progress".equals(r.status)).count();
         long resolved = Database.requests.stream().filter(r -> r.userId == Database.currentUser.userId && "Resolved".equals(r.status)).count();
 
-        stats.add(statCard(String.valueOf(Database.locations.size()), "Locations", UIUtils.ACCENT));
-        stats.add(statCard(String.valueOf(open),             "My Open", UIUtils.DANGER));
-        stats.add(statCard(String.valueOf(inProg),           "My In Progress", UIUtils.WARNING));
-        stats.add(statCard(String.valueOf(resolved),         "My Resolved", UIUtils.SUCCESS));
+        stats.add(animatedStatCard(String.valueOf(Database.locations.size()), "Locations", UIUtils.ACCENT, 0));
+        stats.add(animatedStatCard(String.valueOf(open),             "My Open", UIUtils.DANGER, 300));
+        stats.add(animatedStatCard(String.valueOf(inProg),           "My In Progress", UIUtils.WARNING, 600));
+        stats.add(animatedStatCard(String.valueOf(resolved),         "My Resolved", UIUtils.SUCCESS, 900));
 
-        body.add(UIUtils.sectionLabel("Your Activity Overview"));
+        JLabel overviewLabel = UIUtils.sectionLabel("Your Activity Overview");
+        overviewLabel.setForeground(UIUtils.BG);
+        body.add(overviewLabel);
         body.add(Box.createVerticalStrut(8));
         body.add(stats);
         body.add(Box.createVerticalStrut(25));
@@ -121,7 +128,9 @@ public class HomePanel {
         body.add(Box.createVerticalStrut(25));
 
         // Recent requests table
-        body.add(UIUtils.sectionLabel("Your Recent Requests"));
+        JLabel recentLabel = UIUtils.sectionLabel("Your Recent Requests");
+        recentLabel.setForeground(UIUtils.BG);
+        body.add(recentLabel);
         body.add(Box.createVerticalStrut(8));
         String[] cols = {"ID","Description","Location","Status","Date","Est. Response"};
         
@@ -151,21 +160,91 @@ public class HomePanel {
         scroll.setBorder(null);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         root.add(scroll, BorderLayout.CENTER);
+
+        // Start all animations after UI is built
+        final JButton finalLogBtn = logBtn;
+        SwingUtilities.invokeLater(() -> {
+            Animations.typeWriterEffect(hl, greeting + ", " + Database.currentUser.name, 75);
+            Timer subTimer = new Timer(2000, e -> {
+                Animations.typeWriterEffect(hs, "Role: " + Database.currentUser.role.toUpperCase() + "  |  " + UIUtils.today(), 30);
+            });
+            subTimer.setRepeats(false);
+            subTimer.start();
+            
+            Timer overviewTimer = new Timer(1500, e -> {
+                fadeInLabel(overviewLabel, 500);
+            });
+            overviewTimer.setRepeats(false);
+            overviewTimer.start();
+            
+            Timer recentTimer = new Timer(2800, e -> {
+                fadeInLabel(recentLabel, 500);
+            });
+            recentTimer.setRepeats(false);
+            recentTimer.start();
+            
+            if (finalLogBtn != null) {
+                Animations.pulseButton(finalLogBtn, UIUtils.ACCENT, UIUtils.ACCENT2);
+            }
+        });
+
         return root;
     }
 
-    private static JPanel statCard(String num, String label, Color col) {
+    private static JPanel animatedStatCard(String num, String label, Color col, int delay) {
         JPanel p = UIUtils.card();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        JLabel n = new JLabel(num, SwingConstants.CENTER);
+        
+        JLabel n = new JLabel("0", SwingConstants.CENTER);
         n.setFont(new Font("SansSerif", Font.BOLD, 30));
         n.setForeground(col);
         n.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
         JLabel l = new JLabel(label, SwingConstants.CENTER);
         l.setFont(UIUtils.fontSmall);
         l.setForeground(UIUtils.TEXT2);
         l.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
         p.add(n); p.add(Box.createVerticalStrut(4)); p.add(l);
+        
+        // Animate counting up
+        try {
+            final int finalNum = Integer.parseInt(num);
+            Timer timer = new Timer(50, new ActionListener() {
+                private int current = 0;
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    current++;
+                    n.setText(String.valueOf(current));
+                    if (current >= finalNum) {
+                        ((Timer)e.getSource()).stop();
+                    }
+                }
+            });
+            timer.setInitialDelay(delay);
+            timer.start();
+        } catch (Exception e) {
+            n.setText(num);
+        }
+        
         return p;
+    }
+    
+    private static void fadeInLabel(JLabel label, int duration) {
+        label.setForeground(UIUtils.TEXT2);
+        Timer timer = new Timer(30, new ActionListener() {
+            float alpha = 0.0f;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                alpha += 0.05f;
+                if (alpha >= 1.0f) {
+                    alpha = 1.0f;
+                    label.setForeground(UIUtils.TEXT2);
+                    ((Timer)e.getSource()).stop();
+                }
+                label.repaint();
+            }
+        });
+        timer.start();
     }
 }

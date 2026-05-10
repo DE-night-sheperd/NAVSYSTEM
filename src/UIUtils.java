@@ -66,18 +66,24 @@ public class UIUtils {
     public static JButton primaryBtn(String text) {
         JButton b = new JButton(text) {
             private float alpha = 0f;
+            private float scale = 1.0f;
             private Timer animTimer;
             {
                 addMouseListener(new MouseAdapter() {
-                    @Override public void mouseEntered(MouseEvent e) { startAnim(1f); }
-                    @Override public void mouseExited(MouseEvent e) { startAnim(0f); }
+                    @Override public void mouseEntered(MouseEvent e) { startAnim(1f, 1.05f); }
+                    @Override public void mouseExited(MouseEvent e) { startAnim(0f, 1.0f); }
                 });
             }
-            private void startAnim(float target) {
+            private void startAnim(float targetAlpha, float targetScale) {
                 if (animTimer != null) animTimer.stop();
-                animTimer = new Timer(15, e -> {
-                    alpha += (target - alpha) * 0.3f;
-                    if (Math.abs(target - alpha) < 0.01f) { alpha = target; animTimer.stop(); }
+                animTimer = new Timer(10, e -> {
+                    alpha += (targetAlpha - alpha) * 0.3f;
+                    scale += (targetScale - scale) * 0.2f;
+                    if (Math.abs(targetAlpha - alpha) < 0.01f && Math.abs(targetScale - scale) < 0.001f) { 
+                        alpha = targetAlpha; 
+                        scale = targetScale;
+                        animTimer.stop(); 
+                    }
                     repaint();
                 });
                 animTimer.start();
@@ -86,11 +92,21 @@ public class UIUtils {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                int w = getWidth(); int h = getHeight();
+                
+                int w = getWidth(); 
+                int h = getHeight();
+                int cx = w / 2;
+                int cy = h / 2;
+                
+                AffineTransform old = g2.getTransform();
+                g2.translate(cx, cy);
+                g2.scale(scale, scale);
+                g2.translate(-cx, -cy);
+                
                 g2.setColor(ACCENT);
                 g2.fillRoundRect(0, 0, w, h, 10, 10);
                 if (alpha > 0) {
-                    g2.setColor(new Color(255, 255, 255, (int)(alpha * 40)));
+                    g2.setColor(new Color(255, 255, 255, (int)(alpha * 60)));
                     g2.fillRoundRect(0, 0, w, h, 10, 10);
                 }
                 FontMetrics fm = g2.getFontMetrics();
@@ -98,6 +114,8 @@ public class UIUtils {
                 int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
                 g2.setColor(Color.WHITE);
                 g2.drawString(getText(), tx, ty);
+                
+                g2.setTransform(old);
             }
         };
         b.setFont(fontBold);
@@ -113,18 +131,24 @@ public class UIUtils {
     public static JButton secondaryBtn(String text) {
         JButton b = new JButton(text) {
             private float alpha = 0f;
+            private float scale = 1.0f;
             private Timer animTimer;
             {
                 addMouseListener(new MouseAdapter() {
-                    @Override public void mouseEntered(MouseEvent e) { startAnim(1f); }
-                    @Override public void mouseExited(MouseEvent e) { startAnim(0f); }
+                    @Override public void mouseEntered(MouseEvent e) { startAnim(1f, 1.05f); }
+                    @Override public void mouseExited(MouseEvent e) { startAnim(0f, 1.0f); }
                 });
             }
-            private void startAnim(float target) {
+            private void startAnim(float targetAlpha, float targetScale) {
                 if (animTimer != null) animTimer.stop();
-                animTimer = new Timer(15, e -> {
-                    alpha += (target - alpha) * 0.3f;
-                    if (Math.abs(target - alpha) < 0.01f) { alpha = target; animTimer.stop(); }
+                animTimer = new Timer(10, e -> {
+                    alpha += (targetAlpha - alpha) * 0.3f;
+                    scale += (targetScale - scale) * 0.2f;
+                    if (Math.abs(targetAlpha - alpha) < 0.01f && Math.abs(targetScale - scale) < 0.001f) { 
+                        alpha = targetAlpha; 
+                        scale = targetScale;
+                        animTimer.stop(); 
+                    }
                     repaint();
                 });
                 animTimer.start();
@@ -133,11 +157,21 @@ public class UIUtils {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                int w = getWidth(); int h = getHeight();
+                
+                int w = getWidth(); 
+                int h = getHeight();
+                int cx = w / 2;
+                int cy = h / 2;
+                
+                AffineTransform old = g2.getTransform();
+                g2.translate(cx, cy);
+                g2.scale(scale, scale);
+                g2.translate(-cx, -cy);
+                
                 g2.setColor(lighter(ACCENT));
                 g2.fillRoundRect(0, 0, w, h, 10, 10);
                 if (alpha > 0) {
-                    g2.setColor(new Color(ACCENT.getRed(), ACCENT.getGreen(), ACCENT.getBlue(), (int)(alpha * 40)));
+                    g2.setColor(new Color(ACCENT.getRed(), ACCENT.getGreen(), ACCENT.getBlue(), (int)(alpha * 60)));
                     g2.fillRoundRect(0, 0, w, h, 10, 10);
                 }
                 FontMetrics fm = g2.getFontMetrics();
@@ -145,6 +179,8 @@ public class UIUtils {
                 int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
                 g2.setColor(ACCENT);
                 g2.drawString(getText(), tx, ty);
+                
+                g2.setTransform(old);
             }
         };
         b.setFont(fontNormal);

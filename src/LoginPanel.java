@@ -36,26 +36,59 @@ public class LoginPanel {
             }
         };
 
-        // Premium Login Card
+        // Premium Login Card with Animation
         JPanel card = new JPanel() {
+            private float cardScale = 0.0f;
+            private float cardAlpha = 0.0f;
+            private Timer animTimer;
+            
+            {
+                animTimer = new Timer(15, e -> {
+                    cardScale += 0.05f;
+                    cardAlpha += 0.03f;
+                    if (cardScale >= 1.0f) {
+                        cardScale = 1.0f;
+                    }
+                    if (cardAlpha >= 1.0f) {
+                        cardAlpha = 1.0f;
+                        animTimer.stop();
+                    }
+                    repaint();
+                });
+                animTimer.start();
+            }
+            
             @Override
             protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, cardAlpha));
+                
+                int w = getWidth();
+                int h = getHeight();
+                int cx = w/2;
+                int cy = h/2;
+                
+                AffineTransform old = g2.getTransform();
+                g2.translate(cx, cy);
+                g2.scale(cardScale, cardScale);
+                g2.translate(-cx, -cy);
                 
                 // Shadow
                 g2.setColor(new Color(0, 0, 0, 80));
-                g2.fillRoundRect(5, 5, getWidth()-10, getHeight()-10, 40, 40);
+                g2.fillRoundRect(5, 5, w-10, h-10, 40, 40);
                 
                 // Card Body
                 g2.setColor(Color.WHITE);
-                g2.fillRoundRect(0, 0, getWidth()-5, getHeight()-5, 40, 40);
+                g2.fillRoundRect(0, 0, w-5, h-5, 40, 40);
                 
                 // Decorative Accent Bar at the top
                 g2.setColor(UIUtils.NAVY);
-                g2.fillRoundRect(0, 0, getWidth()-5, 12, 40, 40);
-                g2.fillRect(0, 6, getWidth()-5, 6);
+                g2.fillRoundRect(0, 0, w-5, 12, 40, 40);
+                g2.fillRect(0, 6, w-5, 6);
                 
+                g2.setTransform(old);
                 g2.dispose();
             }
         };
