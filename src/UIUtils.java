@@ -3,6 +3,7 @@ import javax.swing.table.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 
 public class UIUtils {
     public static boolean isDarkMode = false;

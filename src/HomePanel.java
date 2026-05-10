@@ -20,7 +20,7 @@ public class HomePanel {
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setBackground(UIUtils.NAVY());
         
-        String greeting = "Welcome";
+        String greeting;
         int hour = java.time.LocalTime.now().getHour();
         if (hour < 12) greeting = "Good Morning";
         else if (hour < 17) greeting = "Good Afternoon";
@@ -84,7 +84,7 @@ public class HomePanel {
         stats.add(animatedStatCard(String.valueOf(resolved),         "My Resolved", UIUtils.SUCCESS, 900));
 
         JLabel overviewLabel = UIUtils.sectionLabel("Your Activity Overview");
-        overviewLabel.setForeground(UIUtils.BG);
+        overviewLabel.setForeground(UIUtils.TEXT1());
         body.add(overviewLabel);
         body.add(Box.createVerticalStrut(8));
         body.add(stats);
@@ -92,7 +92,7 @@ public class HomePanel {
 
         // Quick Actions & Announcements
         JPanel midRow = new JPanel(new GridLayout(1, 2, 20, 0));
-        midRow.setBackground(UIUtils.BG);
+        midRow.setBackground(UIUtils.BG());
         midRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
 
         // Quick Actions
@@ -148,7 +148,7 @@ public class HomePanel {
 
         // Recent requests table
         JLabel recentLabel = UIUtils.sectionLabel("Your Recent Requests");
-        recentLabel.setForeground(UIUtils.BG);
+        recentLabel.setForeground(UIUtils.TEXT1());
         body.add(recentLabel);
         body.add(Box.createVerticalStrut(8));
         String[] cols = {"ID","Description","Location","Status","Date","Est. Response"};
@@ -171,7 +171,7 @@ public class HomePanel {
         JTable table = UIUtils.styledTable(data, cols);
         UIUtils.styleStatusColumn(table, 3);
         JScrollPane sp = new JScrollPane(table);
-        sp.setBorder(BorderFactory.createLineBorder(UIUtils.BORDER));
+        sp.setBorder(BorderFactory.createLineBorder(UIUtils.BORDER()));
         sp.setAlignmentX(Component.LEFT_ALIGNMENT);
         body.add(sp);
 
