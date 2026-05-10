@@ -10,15 +10,15 @@ public class HomePanel {
 
     public static JPanel build(java.util.function.Consumer<String> pageLoader) {
         JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(UIUtils.BG);
+        root.setBackground(UIUtils.BG());
 
         // Header
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(UIUtils.NAVY);
+        header.setBackground(UIUtils.NAVY());
         header.setBorder(BorderFactory.createEmptyBorder(24,28,24,28));
         
         JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(UIUtils.NAVY);
+        titlePanel.setBackground(UIUtils.NAVY());
         
         String greeting = "Welcome";
         int hour = java.time.LocalTime.now().getHour();
@@ -47,12 +47,12 @@ public class HomePanel {
 
         JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-        body.setBackground(UIUtils.BG);
+        body.setBackground(UIUtils.BG());
         body.setBorder(BorderFactory.createEmptyBorder(20,24,20,24));
 
         // Stats row
         JPanel stats = new JPanel(new GridLayout(1, 4, 14, 0));
-        stats.setBackground(UIUtils.BG);
+        stats.setBackground(UIUtils.BG());
         stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
         long open = Database.requests.stream().filter(r -> r.userId == Database.currentUser.userId && "Submitted".equals(r.status)).count();

@@ -5,19 +5,55 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class UIUtils {
-    // Colors
-    public static final Color NAVY       = new Color(153, 27, 27);  // Deep Red
-    public static final Color NAVY_LIGHT = new Color(185, 28, 28);  // Brighter Red
-    public static final Color ACCENT     = new Color(220, 38, 38);  // Primary Red
-    public static final Color ACCENT2    = new Color(239, 68, 68);  // Lighter Red
-    public static final Color SUCCESS    = new Color(22, 163, 74);
-    public static final Color WARNING    = new Color(217, 119, 6);
-    public static final Color DANGER     = new Color(185, 28, 28);
-    public static final Color BG         = new Color(255, 255, 255); // White BG
-    public static final Color CARD       = Color.WHITE;
-    public static final Color BORDER     = new Color(229, 231, 235);
-    public static final Color TEXT1      = new Color(17, 24, 39);
-    public static final Color TEXT2      = new Color(75, 85, 99);
+    public static boolean isDarkMode = false;
+    
+    // Light Mode Colors
+    public static final Color NAVY_LIGHT_MODE = new Color(153, 27, 27);
+    public static final Color NAVY_LIGHT_LIGHT_MODE = new Color(185, 28, 28);
+    public static final Color ACCENT_LIGHT_MODE = new Color(220, 38, 38);
+    public static final Color ACCENT2_LIGHT_MODE = new Color(239, 68, 68);
+    public static final Color BG_LIGHT_MODE = new Color(255, 255, 255);
+    public static final Color CARD_LIGHT_MODE = Color.WHITE;
+    public static final Color BORDER_LIGHT_MODE = new Color(229, 231, 235);
+    public static final Color TEXT1_LIGHT_MODE = new Color(17, 24, 39);
+    public static final Color TEXT2_LIGHT_MODE = new Color(75, 85, 99);
+    
+    // Dark Mode Colors
+    public static final Color NAVY_DARK_MODE = new Color(185, 28, 28);
+    public static final Color NAVY_LIGHT_DARK_MODE = new Color(220, 38, 38);
+    public static final Color ACCENT_DARK_MODE = new Color(239, 68, 68);
+    public static final Color ACCENT2_DARK_MODE = new Color(248, 113, 113);
+    public static final Color BG_DARK_MODE = new Color(15, 23, 42);
+    public static final Color CARD_DARK_MODE = new Color(30, 41, 59);
+    public static final Color BORDER_DARK_MODE = new Color(51, 65, 85);
+    public static final Color TEXT1_DARK_MODE = new Color(241, 245, 249);
+    public static final Color TEXT2_DARK_MODE = new Color(148, 163, 184);
+    
+    // Dynamic getters for colors based on mode
+    public static Color NAVY() { return isDarkMode ? NAVY_DARK_MODE : NAVY_LIGHT_MODE; }
+    public static Color NAVY_LIGHT() { return isDarkMode ? NAVY_LIGHT_DARK_MODE : NAVY_LIGHT_LIGHT_MODE; }
+    public static Color ACCENT() { return isDarkMode ? ACCENT_DARK_MODE : ACCENT_LIGHT_MODE; }
+    public static Color ACCENT2() { return isDarkMode ? ACCENT2_DARK_MODE : ACCENT2_LIGHT_MODE; }
+    public static Color BG() { return isDarkMode ? BG_DARK_MODE : BG_LIGHT_MODE; }
+    public static Color CARD() { return isDarkMode ? CARD_DARK_MODE : CARD_LIGHT_MODE; }
+    public static Color BORDER() { return isDarkMode ? BORDER_DARK_MODE : BORDER_LIGHT_MODE; }
+    public static Color TEXT1() { return isDarkMode ? TEXT1_DARK_MODE : TEXT1_LIGHT_MODE; }
+    public static Color TEXT2() { return isDarkMode ? TEXT2_DARK_MODE : TEXT2_LIGHT_MODE; }
+    
+    // Keep these as constants since they don't change
+    public static final Color SUCCESS = new Color(22, 163, 74);
+    public static final Color WARNING = new Color(217, 119, 6);
+    public static final Color DANGER = new Color(185, 28, 28);
+    
+    // Deprecated constants for backward compatibility (just aliases to light mode)
+    public static final Color NAVY = NAVY_LIGHT_MODE;
+    public static final Color ACCENT = ACCENT_LIGHT_MODE;
+    public static final Color ACCENT2 = ACCENT2_LIGHT_MODE;
+    public static final Color BG = BG_LIGHT_MODE;
+    public static final Color CARD = CARD_LIGHT_MODE;
+    public static final Color BORDER = BORDER_LIGHT_MODE;
+    public static final Color TEXT1 = TEXT1_LIGHT_MODE;
+    public static final Color TEXT2 = TEXT2_LIGHT_MODE;
 
     // Fonts
     public static Font fontTitle  = new Font("SansSerif", Font.BOLD,  22);
@@ -55,9 +91,9 @@ public class UIUtils {
 
     public static JPanel card() {
         JPanel p = new JPanel();
-        p.setBackground(CARD);
+        p.setBackground(CARD());
         p.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER, 1, true),
+            BorderFactory.createLineBorder(BORDER(), 1, true),
             BorderFactory.createEmptyBorder(12,14,12,14)
         ));
         return p;
@@ -103,7 +139,7 @@ public class UIUtils {
                 g2.scale(scale, scale);
                 g2.translate(-cx, -cy);
                 
-                g2.setColor(ACCENT);
+                g2.setColor(ACCENT());
                 g2.fillRoundRect(0, 0, w, h, 10, 10);
                 if (alpha > 0) {
                     g2.setColor(new Color(255, 255, 255, (int)(alpha * 60)));
@@ -168,16 +204,16 @@ public class UIUtils {
                 g2.scale(scale, scale);
                 g2.translate(-cx, -cy);
                 
-                g2.setColor(lighter(ACCENT));
+                g2.setColor(lighter(ACCENT()));
                 g2.fillRoundRect(0, 0, w, h, 10, 10);
                 if (alpha > 0) {
-                    g2.setColor(new Color(ACCENT.getRed(), ACCENT.getGreen(), ACCENT.getBlue(), (int)(alpha * 60)));
+                    g2.setColor(new Color(ACCENT().getRed(), ACCENT().getGreen(), ACCENT().getBlue(), (int)(alpha * 60)));
                     g2.fillRoundRect(0, 0, w, h, 10, 10);
                 }
                 FontMetrics fm = g2.getFontMetrics();
                 int tx = (w - fm.stringWidth(getText())) / 2;
                 int ty = (h - fm.getHeight()) / 2 + fm.getAscent();
-                g2.setColor(ACCENT);
+                g2.setColor(ACCENT());
                 g2.drawString(getText(), tx, ty);
                 
                 g2.setTransform(old);

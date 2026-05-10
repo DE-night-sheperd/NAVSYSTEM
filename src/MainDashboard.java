@@ -56,7 +56,35 @@ public class MainDashboard extends JPanel {
             addNavItem(sidebar, "\uD83D\uDC77", "staff_tasks", StaffPanel.build(mainFrame));
         }
 
-        sidebar.add(Box.createVerticalGlue()); // Pushes the logout button to the bottom
+        sidebar.add(Box.createVerticalGlue()); // Pushes theme and logout buttons to the bottom
+        
+        // Dark/Light Mode Toggle Button
+        JButton themeToggle = new JButton(UIUtils.isDarkMode ? "☀️" : "🌙");
+        themeToggle.setToolTipText(UIUtils.isDarkMode ? "Light Mode" : "Dark Mode");
+        themeToggle.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        themeToggle.setForeground(Color.WHITE);
+        themeToggle.setBackground(Color.BLACK);
+        themeToggle.setContentAreaFilled(true);
+        themeToggle.setBorderPainted(false);
+        themeToggle.setOpaque(true);
+        themeToggle.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        themeToggle.setFocusPainted(false);
+        themeToggle.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        themeToggle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        themeToggle.setMaximumSize(new Dimension(80, 50));
+        themeToggle.addActionListener(e -> {
+            UIUtils.isDarkMode = !UIUtils.isDarkMode;
+            themeToggle.setText(UIUtils.isDarkMode ? "☀️" : "🌙");
+            themeToggle.setToolTipText(UIUtils.isDarkMode ? "Light Mode" : "Dark Mode");
+            
+            // Refresh the entire dashboard
+            mainFrame.getContentPane().removeAll();
+            mainFrame.add(new MainDashboard(mainFrame));
+            mainFrame.revalidate();
+            mainFrame.repaint();
+        });
+        sidebar.add(themeToggle);
+        sidebar.add(Box.createVerticalStrut(5));
 
         // Logout Button: Clears session and returns to login screen
         JButton logout = new JButton("\uD83D\uDEAA");
